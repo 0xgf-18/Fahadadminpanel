@@ -391,6 +391,186 @@
             .flow-bg .blob, .flow-bg .sheen, .status-dot::after { animation: none !important; }
             * { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
         }
+
+        /* ==========================================================================
+           V3 — FULL REDESIGN
+           Zero backdrop-filter · zero blur() filters · transform-only animation
+           ========================================================================== */
+
+        /* ---------- BACKGROUND: vivid, evenly lit, cheap ---------- */
+        .flow-bg {
+            background:
+                radial-gradient(125vmax 95vmax at 6% -12%, rgba(79,125,255,0.62) 0%, rgba(79,125,255,0.20) 40%, rgba(79,125,255,0) 68%),
+                radial-gradient(115vmax 90vmax at 101% 2%, rgba(34,211,238,0.48) 0%, rgba(34,211,238,0.15) 42%, rgba(34,211,238,0) 70%),
+                radial-gradient(140vmax 110vmax at 50% 110%, rgba(124,92,255,0.58) 0%, rgba(124,92,255,0.18) 45%, rgba(124,92,255,0) 72%),
+                radial-gradient(95vmax 78vmax at 96% 94%, rgba(20,184,166,0.36) 0%, rgba(20,184,166,0) 66%),
+                linear-gradient(168deg, #111c4a 0%, #0b1033 46%, #130d3c 100%);
+        }
+        .flow-bg .blob { filter: none !important; -webkit-filter: none !important; opacity: .92; }
+        .flow-bg .b1 { background: radial-gradient(circle at 50% 50%, rgba(79,125,255,0.95) 0%, rgba(79,125,255,0.58) 28%, rgba(79,125,255,0.16) 54%, rgba(79,125,255,0) 72%); }
+        .flow-bg .b2 { background: radial-gradient(circle at 50% 50%, rgba(34,211,238,0.88) 0%, rgba(34,211,238,0.46) 28%, rgba(34,211,238,0.12) 54%, rgba(34,211,238,0) 72%); opacity: .82; }
+        .flow-bg .b3 { background: radial-gradient(circle at 50% 50%, rgba(139,92,246,0.95) 0%, rgba(124,92,255,0.52) 28%, rgba(124,92,255,0.14) 54%, rgba(124,92,255,0) 72%); opacity: .88; }
+        .flow-bg .sheen { display: none !important; }   /* rotating conic layer = full-screen repaint */
+        .flow-bg::after { opacity: .13; }
+
+        /* ---------- SURFACES: brighter, higher contrast glass ---------- */
+        .ios-card {
+            background-color: rgba(255,255,255,0.075);
+            background-image: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.035) 40%);
+            border-color: rgba(255,255,255,0.15); border-radius: 24px;
+            box-shadow: 0 32px 62px -36px rgba(0,0,0,1), inset 0 1px 0 rgba(255,255,255,0.20);
+        }
+        .list-card, .guide-card, .saved-url-item {
+            background-color: rgba(255,255,255,0.07);
+            background-image: linear-gradient(180deg, rgba(255,255,255,0.13), rgba(255,255,255,0.03) 45%);
+            border-color: rgba(255,255,255,0.14);
+            box-shadow: 0 28px 54px -36px rgba(0,0,0,1), inset 0 1px 0 rgba(255,255,255,0.18);
+        }
+        .list-card { border-radius: 24px; }
+        .guide-card { border-radius: 20px; }
+        .device-row { background-color: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.11); border-radius: 16px; }
+        .device-row:active { background-color: rgba(255,255,255,0.11); }
+
+        /* ---------- HEADER ---------- */
+        .page-header, .search-bar-container {
+            background: linear-gradient(180deg, rgba(10,13,30,0.97), rgba(10,13,30,0.90));
+            border-bottom-color: rgba(255,255,255,0.11);
+        }
+        .page-header::after {
+            height: 2px; background: linear-gradient(90deg, transparent 0%, var(--ios-primary) 25%, var(--accent-c) 60%, var(--accent-b) 85%, transparent 100%); opacity: .9;
+        }
+        .app-main-title { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.035em; }
+        .btn-icon {
+            width: 44px; height: 44px; border-radius: 15px;
+            background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.16);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 14px 28px -20px rgba(0,0,0,1);
+            color: #E8EEFF;
+        }
+        .btn-icon:active { background-color: rgba(255,255,255,0.18); }
+        .btn-icon.logout { background: rgba(255,69,58,0.16); border-color: rgba(255,69,58,0.42); color: #FF7A70; }
+
+        /* ---------- INPUTS ---------- */
+        .input-group input, .input-group textarea, .input-group select, .search-bar {
+            background-color: rgba(0,0,0,0.32);
+            border-color: rgba(255,255,255,0.13); border-radius: 16px;
+        }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus, .search-bar:focus {
+            border-color: rgba(139,168,255,0.9);
+            background-color: rgba(255,255,255,0.09);
+            box-shadow: 0 0 0 4px rgba(79,125,255,0.26), 0 18px 40px -26px rgba(79,125,255,1);
+        }
+
+        /* ---------- BUTTONS / CHIPS ---------- */
+        .btn-primary {
+            background-image: var(--accent-grad);
+            box-shadow: 0 22px 44px -18px rgba(79,125,255,1), inset 0 1px 0 rgba(255,255,255,0.45);
+        }
+        .filter-chip { background-color: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.13); font-weight: 600; }
+        .filter-chip.active {
+            background-color: transparent; background-image: var(--accent-grad); color: #fff;
+            border-color: rgba(255,255,255,0.30);
+            box-shadow: 0 14px 30px -12px rgba(79,125,255,1), inset 0 1px 0 rgba(255,255,255,0.40);
+        }
+        .btn-xs { background-color: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.12); border-radius: 14px; }
+        .btn-xs:active { background-color: rgba(255,255,255,0.17); }
+
+        /* ---------- LANGUAGE SCREEN (full redesign) ---------- */
+        #lang-overlay {
+            gap: 12px; padding: 24px 18px;
+            background: linear-gradient(180deg, rgba(5,7,20,0.66) 0%, rgba(5,7,20,0.34) 42%, rgba(5,7,20,0.76) 100%);
+        }
+        .lang-brand {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 7px 15px; border-radius: 999px;
+            background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.18);
+            color: rgba(235,239,245,0.85); font-size: 0.66rem; font-weight: 800; letter-spacing: 0.18em;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.20);
+        }
+        .lang-brand-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-grad); box-shadow: 0 0 12px rgba(79,125,255,1); }
+        #lang-overlay h2 {
+            font-size: clamp(2rem, 8vw, 2.6rem); font-weight: 800; letter-spacing: -0.04em; margin: 6px 0 2px;
+            background-image: linear-gradient(115deg, #ffffff 4%, #A9C3FF 44%, var(--accent-b) 96%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+            text-shadow: none;
+        }
+        .lang-sub { color: var(--text-dim); font-size: 0.82rem; margin: 0 0 10px; text-align: center; }
+        .lang-list { display: flex; flex-direction: column; gap: 11px; width: min(430px, 100%); }
+        .lang-btn {
+            display: flex; align-items: center; gap: 14px; width: 100%; max-width: none;
+            padding: 11px 16px; border-radius: 20px; color: #fff; text-align: start; cursor: pointer;
+            background: linear-gradient(180deg, rgba(24,29,56,0.74), rgba(11,13,28,0.82));
+            border: 1px solid rgba(255,255,255,0.16);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 20px 44px -30px rgba(0,0,0,1);
+        }
+        .lang-code {
+            flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px;
+            background-image: var(--accent-grad); color: #fff; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.05em;
+            box-shadow: 0 12px 24px -14px rgba(79,125,255,1), inset 0 1px 0 rgba(255,255,255,0.40);
+        }
+        .lang-name { flex: 1; display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+        .lang-name b { font-size: 1rem; font-weight: 700; }
+        .lang-name small { color: var(--text-dim); font-size: 0.73rem; font-weight: 500; }
+        .lang-btn > i { color: rgba(255,255,255,0.42); font-size: 0.78rem; transition: transform .3s var(--ease-out), color .3s; }
+        .lang-btn:active {
+            transform: scale(0.975); border-color: rgba(139,168,255,0.85);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 0 0 4px rgba(79,125,255,0.22);
+        }
+        .lang-btn:active > i { color: #fff; transform: translateX(5px); }
+
+        /* ---------- LOGIN SCREEN ---------- */
+        #login-screen { background-color: rgba(6,8,22,0.44); animation: none !important; }  /* bg-position anim = repaint */
+        #login-screen .login-wrapper { width: 100%; max-width: 460px; }
+        .logo-icon {
+            width: 88px; height: 88px; border-radius: 27px; display: grid; place-items: center; margin: 0 auto 22px;
+            background: linear-gradient(150deg, rgba(79,125,255,0.40), rgba(34,211,238,0.16));
+            border: 1px solid rgba(255,255,255,0.22); filter: none;
+            box-shadow: 0 30px 64px -30px rgba(79,125,255,1), inset 0 1px 0 rgba(255,255,255,0.30);
+        }
+        .logo-icon i { font-size: 2.2rem; }
+        #login-screen h1 { font-size: clamp(1.9rem, 8vw, 2.35rem); letter-spacing: -0.03em; margin-bottom: 26px; }
+
+        /* ---------- BOTTOM NAV (floating glass pill + icon tiles) ---------- */
+        .bottom-nav {
+            bottom: calc(12px + env(safe-area-inset-bottom));
+            left: 50%; right: auto; transform: translateX(-50%);
+            width: calc(100% - 20px); max-width: 520px; margin: 0;
+            height: 74px; padding-bottom: 0;
+            background: linear-gradient(180deg, rgba(22,27,52,0.93), rgba(9,11,24,0.97));
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 26px;
+            backdrop-filter: none; -webkit-backdrop-filter: none;
+            justify-content: space-around; gap: 4px;
+            box-shadow: 0 32px 64px -32px rgba(0,0,0,1), inset 0 1px 0 rgba(255,255,255,0.18);
+        }
+        .nav-item {
+            flex: 1; flex-direction: column; gap: 5px; border-radius: 20px; padding: 7px 4px;
+            color: var(--text-dim); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+        }
+        .ni-icon {
+            width: 42px; height: 34px; display: grid; place-items: center; border-radius: 13px;
+            background: rgba(255,255,255,0.08);
+            transition: background-color .3s, box-shadow .3s, transform .35s var(--ease-spring);
+        }
+        .nav-item i { font-size: 1rem; color: inherit; filter: none; transform: none; }
+        .nav-item:not(.active):active { background-color: rgba(255,255,255,0.07); transform: scale(0.95); }
+        .nav-item:not(.active):active .ni-icon { background: rgba(255,255,255,0.16); }
+        .nav-item.active {
+            color: #fff; background-color: transparent; background-image: var(--accent-grad);
+            box-shadow: 0 18px 34px -16px rgba(79,125,255,1), inset 0 1px 0 rgba(255,255,255,0.45);
+        }
+        .nav-item.active .ni-icon {
+            background: rgba(255,255,255,0.28);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
+            transform: translateY(-1px);
+        }
+        .nav-item.active span:last-child { background-image: none; -webkit-text-fill-color: #fff; color: #fff; }
+
+        /* ---------- MODALS ---------- */
+        .modal-card { border-top-color: rgba(255,255,255,0.22); }
+        .modal-overlay { background: linear-gradient(180deg, rgba(3,4,12,0.82), rgba(3,4,12,0.90)); }
+
+        /* ---------- MISC ---------- */
+        .watermark { color: rgba(255,255,255,0.42); letter-spacing: 4px; font-weight: 700; text-shadow: 0 0 22px rgba(79,125,255,0.7); }
+        .status-bar-hairline { background: linear-gradient(90deg, transparent, rgba(79,125,255,0.5), rgba(34,211,238,0.5), transparent); }
     </style>
 </head>
 <body dir="ltr">
@@ -411,12 +591,36 @@
 
     <!-- LANGUAGE OVERLAY -->
     <div id="lang-overlay">
-        <h2 style="color:#fff; font-weight:800; margin-bottom:10px; text-align:center;">Select Language</h2>
-        <div class="lang-btn" onclick="setLang('en')">English (Default)</div>
-        <div class="lang-btn" onclick="setLang('hi')">हिन्दी (Hindi)</div>
-        <div class="lang-btn" onclick="setLang('es')">Español (Spanish)</div>
-        <div class="lang-btn" onclick="setLang('bn')">বাংলা (Bangla)</div>
-        <div class="lang-btn" onclick="setLang('ar')">العربية (Arabic)</div>
+        <div class="lang-brand"><span class="lang-brand-dot"></span>PANEL BY FAHAD</div>
+        <h2>Select Language</h2>
+        <p class="lang-sub">Choose your interface language</p>
+        <div class="lang-list">
+            <div class="lang-btn" onclick="setLang('en')">
+                <span class="lang-code">EN</span>
+                <span class="lang-name"><b>English</b><small>Default</small></span>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="lang-btn" onclick="setLang('hi')">
+                <span class="lang-code">HI</span>
+                <span class="lang-name"><b>हिन्दी</b><small>Hindi</small></span>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="lang-btn" onclick="setLang('es')">
+                <span class="lang-code">ES</span>
+                <span class="lang-name"><b>Español</b><small>Spanish</small></span>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="lang-btn" onclick="setLang('bn')">
+                <span class="lang-code">BN</span>
+                <span class="lang-name"><b>বাংলা</b><small>Bangla</small></span>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="lang-btn" onclick="setLang('ar')">
+                <span class="lang-code">AR</span>
+                <span class="lang-name"><b>العربية</b><small>Arabic</small></span>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
     </div>
 
     <!-- FIREBASE LOGIN SCREEN -->
@@ -704,16 +908,16 @@
     <!-- BOTTOM NAVBAR -->
     <div class="bottom-nav" id="bottom-nav" style="display: none;">
         <div class="nav-item active" onclick="nav('keys', this, trans('nav_keys'))" id="nav-tab-keys">
-            <i class="fas fa-key"></i><span data-i18n="nav_keys">Keys</span>
+            <span class="ni-icon"><i class="fas fa-key"></i></span><span data-i18n="nav_keys">Keys</span>
         </div>
         <div class="nav-item" onclick="nav('bans', this, trans('nav_bans'))" id="nav-tab-bans">
-            <i class="fas fa-user-slash"></i><span data-i18n="nav_bans">Bans</span>
+            <span class="ni-icon"><i class="fas fa-user-slash"></i></span><span data-i18n="nav_bans">Bans</span>
         </div>
         <div class="nav-item" onclick="nav('system', this, trans('nav_sys'))" id="nav-tab-sys">
-            <i class="fas fa-cogs"></i><span data-i18n="nav_sys">System</span>
+            <span class="ni-icon"><i class="fas fa-cogs"></i></span><span data-i18n="nav_sys">System</span>
         </div>
         <div class="nav-item" onclick="nav('guide', this, trans('nav_guide'))" id="nav-tab-guide">
-            <i class="fas fa-book"></i><span data-i18n="nav_guide">Guide</span>
+            <span class="ni-icon"><i class="fas fa-book"></i></span><span data-i18n="nav_guide">Guide</span>
         </div>
     </div>
 
