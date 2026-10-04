@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Premium iOS 26 Console</title>
+    <title>Fahad Admin Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -193,9 +193,200 @@
         .tut-tooltip.top-arrow::after { bottom: -18px; left: 50%; transform: translateX(-50%); border-top-color: var(--ios-primary); }
         .tut-tooltip.bottom-arrow::after { top: -18px; left: 50%; transform: translateX(-50%); border-bottom-color: var(--ios-primary); }
         @keyframes pop { 0% { transform: scale(0.8); opacity: 0;} 100% { transform: scale(1); opacity: 1;} }
+
+        /* ==========================================================================
+           V2 - LIQUID GLASS  ·  OPTICAL FLOW  (modern refresh)
+           ========================================================================== */
+        :root {
+            --ios-primary: #4F7DFF;
+            --ios-primary-dim: rgba(79, 125, 255, 0.20);
+            --accent-b: #22D3EE;
+            --accent-c: #7C5CFF;
+            --accent-grad: linear-gradient(115deg, var(--ios-primary) 0%, var(--accent-c) 52%, var(--accent-b) 100%);
+            --bg-base: #05060B;
+            --bg-glass: rgba(255, 255, 255, 0.055);
+            --bg-glass-heavy: rgba(10, 12, 22, 0.92);
+            --border-glass: rgba(255, 255, 255, 0.10);
+            --text-dim: rgba(235, 239, 245, 0.62);
+            --font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            color-scheme: dark;
+        }
+        html { -webkit-text-size-adjust: 100%; }
+        body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.01em; }
+
+        /* ---------- OPTICAL FLOW BACKGROUND ---------- */
+        .flow-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+            background:
+                radial-gradient(1000px 720px at 88% -12%, rgba(79,125,255,0.24), transparent 62%),
+                radial-gradient(900px 720px at -18% 108%, rgba(34,211,238,0.18), transparent 62%),
+                linear-gradient(180deg, #070812 0%, #04050b 55%, #070812 100%);
+        }
+        .flow-bg .blob { position: absolute; display: block; border-radius: 50%; filter: blur(64px); opacity: .5; will-change: transform; transform: translate3d(0,0,0); }
+        .flow-bg .b1 { width: 56vmax; height: 56vmax; left: -20vmax; top: -22vmax; background: #4F7DFF; animation: flow1 26s ease-in-out infinite alternate; }
+        .flow-bg .b2 { width: 50vmax; height: 50vmax; right: -22vmax; top: 16vmax; background: #22D3EE; opacity: .38; animation: flow2 34s ease-in-out infinite alternate; }
+        .flow-bg .b3 { width: 46vmax; height: 46vmax; left: 10vmax; bottom: -26vmax; background: #7C5CFF; opacity: .44; animation: flow3 30s ease-in-out infinite alternate; }
+        .flow-bg .sheen { position: absolute; inset: -60%; background: conic-gradient(from 0deg, transparent 0deg 295deg, rgba(255,255,255,0.05) 330deg, rgba(124,92,255,0.10) 350deg, transparent 360deg); animation: sheenSpin 46s linear infinite; }
+        .flow-bg::after { content: ''; position: absolute; inset: 0; opacity: .22;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        @keyframes flow1 { 0% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(18vmax,12vmax,0) scale(1.18); } 100% { transform: translate3d(6vmax,26vmax,0) scale(.92); } }
+        @keyframes flow2 { 0% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(-16vmax,14vmax,0) scale(1.12); } 100% { transform: translate3d(-4vmax,-8vmax,0) scale(1.02); } }
+        @keyframes flow3 { 0% { transform: translate3d(0,0,0) scale(1.05); } 50% { transform: translate3d(12vmax,-16vmax,0) scale(.9); } 100% { transform: translate3d(-10vmax,-6vmax,0) scale(1.15); } }
+        @keyframes sheenSpin { to { transform: rotate(360deg); } }
+
+        /* ---------- GLASS SURFACES ---------- */
+        .ios-card {
+            background-color: var(--bg-glass);
+            background-image: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 34%, rgba(255,255,255,0.015));
+            backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
+            border: 1px solid var(--border-glass); border-radius: 26px;
+            box-shadow: 0 26px 48px -28px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -1px 0 rgba(255,255,255,0.04);
+            transition: transform .35s var(--ease-out), box-shadow .35s var(--ease-out);
+        }
+        .list-card, .guide-card, .saved-url-item {
+            background-color: rgba(255,255,255,0.05);
+            background-image: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02) 40%);
+            border: 1px solid rgba(255,255,255,0.10);
+            box-shadow: 0 22px 44px -30px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.12);
+            transition: transform .32s var(--ease-out), box-shadow .32s var(--ease-out), background-color .3s;
+        }
+        .list-card { border-radius: 26px; }
+        .guide-card { border-radius: 20px; }
+        .list-card:active, .guide-card:active, .saved-url-item:active { transform: scale(0.985); }
+        .device-row { background-color: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; transition: background-color .3s, transform .3s var(--ease-out); }
+        .device-row:active { transform: scale(0.99); background-color: rgba(255,255,255,0.08); }
+
+        /* ---------- HEADER / SEARCH ---------- */
+        .page-header, .search-bar-container {
+            background: linear-gradient(180deg, rgba(8,10,20,0.74), rgba(8,10,20,0.44));
+            backdrop-filter: blur(26px) saturate(180%); -webkit-backdrop-filter: blur(26px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .page-header::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(79,125,255,0.6), rgba(34,211,238,0.6), transparent); }
+        .search-bar-container { border-bottom: none; }
+        .app-main-title, #login-screen h1 {
+            background-image: linear-gradient(115deg, #ffffff 8%, #b9d2ff 48%, var(--accent-b) 98%);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent; color: transparent; text-shadow: none;
+        }
+        .btn-icon { background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform .28s var(--ease-spring), background-color .3s; }
+
+        /* ---------- INPUTS ---------- */
+        .input-group input, .input-group textarea, .input-group select, .search-bar {
+            background-color: rgba(0,0,0,0.34);
+            border: 1px solid rgba(255,255,255,0.09); border-radius: 18px;
+            transition: border-color .3s var(--ease-out), box-shadow .3s var(--ease-out), background-color .3s;
+        }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus, .search-bar:focus {
+            border-color: rgba(124,158,255,0.8);
+            background-color: rgba(255,255,255,0.07);
+            box-shadow: 0 0 0 4px rgba(79,125,255,0.20), 0 10px 34px -22px rgba(79,125,255,1);
+        }
+        .input-group input[type="date"] { color-scheme: dark; }
+        ::selection { background: rgba(79,125,255,0.45); color: #fff; }
+
+        /* ---------- BUTTONS / CHIPS ---------- */
+        .btn, .btn-xs, .lang-btn, .filter-chip, .btn-icon, .fab-global, .nav-item {
+            transition: transform .28s var(--ease-spring), box-shadow .3s var(--ease-out), background-color .3s, background-image .3s, color .3s, opacity .3s;
+        }
+        .btn-primary {
+            background-image: var(--accent-grad);
+            box-shadow: 0 16px 36px -16px rgba(79,125,255,0.95), inset 0 1px 0 rgba(255,255,255,0.35);
+            position: relative; overflow: hidden;
+        }
+        .btn-primary::before { content: ''; position: absolute; top: 0; left: -70%; width: 45%; height: 100%;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,0.55), transparent);
+            transform: skewX(-20deg); transition: left .65s var(--ease-out); }
+        .btn-primary:active::before { left: 140%; }
+        .btn-primary:active { transform: scale(0.97); opacity: 1; }
+        .filter-chip { background-color: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.09);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .filter-chip:active { transform: scale(0.94); }
+        .filter-chip.active { background-color: transparent; background-image: var(--accent-grad);
+            color: #fff; border-color: rgba(255,255,255,0.25); box-shadow: 0 10px 26px -10px rgba(79,125,255,0.95); }
+        .btn-xs { background-color: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; }
+        .btn-xs:active { background-color: rgba(255,255,255,0.14); transform: scale(0.94); }
+        #fab-add-key { background-image: linear-gradient(135deg, var(--ios-primary), var(--accent-b));
+            box-shadow: 0 18px 38px -16px rgba(79,125,255,1), inset 0 1px 0 rgba(255,255,255,0.4); border-radius: 22px; }
+        #fab-add-ban { background-image: linear-gradient(135deg, #FF453A, #FF8A3D);
+            box-shadow: 0 18px 38px -16px rgba(255,69,58,0.9), inset 0 1px 0 rgba(255,255,255,0.35); border-radius: 22px; }
+        .fab-global { border: 1px solid rgba(255,255,255,0.25); }
+        .interactive-text:active { opacity: 0.6; }
+
+        /* ---------- LANGUAGE OVERLAY ---------- */
+        #lang-overlay { background: rgba(4,5,12,0.6); backdrop-filter: blur(30px) saturate(170%); -webkit-backdrop-filter: blur(30px) saturate(170%); }
+        .lang-btn { background-color: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.13); border-radius: 22px;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 14px 34px -24px rgba(0,0,0,1); }
+        .lang-btn:active { background-color: transparent; background-image: var(--accent-grad); transform: scale(0.96); }
+
+        /* ---------- LOGIN SCREEN ---------- */
+        #login-screen {
+            background-color: rgba(4,5,12,0.55);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(79,125,255,0.30) 0px, transparent 55%),
+                radial-gradient(at 100% 100%, rgba(124,92,255,0.28) 0px, transparent 55%),
+                radial-gradient(at 100% 0%, rgba(34,211,238,0.22) 0px, transparent 55%);
+            animation: meshDrift 24s ease-in-out infinite alternate;
+        }
+        @keyframes meshDrift { 0% { background-position: 0% 0%, 100% 100%, 100% 0%; } 100% { background-position: 45% 65%, 55% 35%, 30% 75%; } }
+        .logo-icon { color: var(--accent-b); filter: drop-shadow(0 0 28px rgba(79,125,255,0.6)); }
+        .logo-icon i { background-image: var(--accent-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .saved-url-item { border-radius: 18px; }
+
+        /* ---------- BOTTOM NAV ---------- */
+        .bottom-nav { background: linear-gradient(180deg, rgba(10,12,22,0.55), rgba(8,10,18,0.84));
+            backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border-top: 1px solid rgba(255,255,255,0.08); box-shadow: 0 -18px 44px -28px rgba(0,0,0,1); }
+        .nav-item { border-radius: 18px; }
+        .nav-item:active { transform: scale(0.9); }
+        .nav-item i { transition: transform .35s var(--ease-spring), filter .35s, color .35s; }
+        .nav-item.active { color: #fff; }
+        .nav-item.active i { color: var(--accent-b); transform: translateY(-3px) scale(1.14); filter: drop-shadow(0 0 10px rgba(34,211,238,0.85)); }
+        .nav-item span { transition: color .3s; }
+        .nav-item.active span { background-image: var(--accent-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* ---------- MODALS ---------- */
+        .modal-overlay { background: rgba(4,5,12,0.55); backdrop-filter: blur(6px) saturate(140%); -webkit-backdrop-filter: blur(6px) saturate(140%); transition: opacity .4s var(--ease-out); }
+        .modal-card { background-color: var(--bg-glass-heavy);
+            background-image: linear-gradient(180deg, rgba(255,255,255,0.11), rgba(255,255,255,0.02) 26%);
+            backdrop-filter: blur(36px) saturate(170%); -webkit-backdrop-filter: blur(36px) saturate(170%);
+            border-radius: 30px 30px 0 0; border-top: 1px solid rgba(255,255,255,0.16);
+            box-shadow: 0 -26px 60px rgba(0,0,0,0.75); transition: transform .45s var(--ease-out); }
+        .modal-handle { width: 44px; height: 5px; background-image: var(--accent-grad); background-color: var(--ios-primary); border-radius: 99px; }
+
+        /* ---------- GUIDE / TUTORIAL / MISC ---------- */
+        .guide-card h3 { background-image: var(--accent-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .tut-tooltip { background-image: var(--accent-grad); background-color: var(--ios-primary); box-shadow: 0 18px 44px rgba(0,0,0,0.8); }
+        #dynamic-island { background: rgba(8,9,16,0.92); border: 1px solid rgba(79,125,255,0.35);
+            backdrop-filter: blur(24px) saturate(170%); -webkit-backdrop-filter: blur(24px) saturate(170%);
+            box-shadow: 0 20px 48px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(255,255,255,0.12); }
+        .watermark { color: rgba(255,255,255,0.32); letter-spacing: 3.5px; text-shadow: 0 0 18px rgba(79,125,255,0.55); }
+        .status-dot { position: relative; }
+        .status-dot::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 1px solid currentColor; opacity: .55; animation: pulseRing 2.4s ease-out infinite; }
+        @keyframes pulseRing { 0% { transform: scale(.7); opacity:.65; } 100% { transform: scale(2); opacity:0; } }
+        .view.active { animation: smoothFadeIn 0.5s var(--ease-out) forwards; }
+        .empty-state { letter-spacing: 0.1px; }
+
+        /* ---------- ACCESSIBILITY ---------- */
+        @media (prefers-reduced-motion: reduce) {
+            .flow-bg .blob, .flow-bg .sheen, .status-dot::after { animation: none !important; }
+            * { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+        }
     </style>
 </head>
 <body dir="ltr">
+
+    <!-- OPTICAL FLOW BACKGROUND -->
+    <div class="flow-bg" aria-hidden="true">
+        <span class="blob b1"></span>
+        <span class="blob b2"></span>
+        <span class="blob b3"></span>
+        <span class="sheen"></span>
+    </div>
 
     <!-- DYNAMIC ISLAND SNACKBAR -->
     <div id="dynamic-island">
@@ -353,9 +544,9 @@
                 </div>
                 <div class="guide-card" style="border-color: var(--ios-primary); background: rgba(0, 122, 255, 0.05);">
                     <h3><i class="fab fa-telegram"></i> Developer Support</h3>
-                    <p data-i18n="gd_sup_d">Need help with the panel or custom modifications? Contact DPMods on Telegram.</p>
-                    <div class="interactive-text" style="color:var(--ios-primary); font-weight:800; font-size:1.1rem; margin-top:10px;" onclick="copyToClipboard('@dpmodsdialog', 'Telegram ID', event)">
-                        @dpmodsdialog <i class="fas fa-copy"></i>
+                    <p data-i18n="gd_sup_d">Need help with the panel or custom modifications? Contact Fahad on Telegram.</p>
+                    <div class="interactive-text" style="color:var(--ios-primary); font-weight:800; font-size:1.1rem; margin-top:10px;" onclick="copyToClipboard('@0xgf18', 'Telegram ID', event)">
+                        @0xgf18 <i class="fas fa-copy"></i>
                     </div>
                 </div>
             </div>
@@ -368,7 +559,7 @@
     <!-- GLOBAL FLOATING BUTTONS (FIXED OUTSIDE CONTAINER TO PREVENT CLIPPING) -->
     <!-- Display is controlled via JS ONLY AFTER LOGIN -->
     <button class="fab-global" id="fab-add-key" onclick="openKeyModal()"><i class="fas fa-plus"></i></button>
-    <button class="fab-global" id="fab-add-ban" onclick="openBanModal()" style="background:var(--danger);"><i class="fas fa-ban"></i></button>
+    <button class="fab-global" id="fab-add-ban" onclick="openBanModal()"><i class="fas fa-ban"></i></button>
 
     <!-- MODALS -->
 
@@ -529,7 +720,7 @@
                 gd_keys_t: "Keys Management", gd_keys_d: "Manage user access. Generate single or bulk 6-digit numeric keys. Use the Edit or Unlink buttons to modify devices.",
                 gd_bans_t: "Ban System", gd_bans_d: "Block malicious users by entering their Device ID (HWID). Blocked devices cannot access the app.",
                 gd_sys_t: "System & Color", gd_sys_d: "Configure Maintenance, Force Update, and UI text. The panel color automatically adapts to the dominant color of the QR Image URL.",
-                gd_sup_d: "Need help with the panel or custom modifications? Contact DPMods on Telegram.",
+                gd_sup_d: "Need help with the panel or custom modifications? Contact Fahad on Telegram.",
                 tut_prompt_t: "Welcome to Panel!", tut_prompt_d: "Would you like a quick interactive tutorial on how to use the panel?", tut_yes: "Yes, start", tut_no: "No, skip",
                 tut_skip: "Skip", tut_next: "Next", tut_done: "Done",
                 tut_step1: "Click the + button to generate single or bulk keys.", tut_step2: "This is your Keys manager. You can Unlink, Edit, or Delete them directly from the card.", tut_step3: "Here you can completely ban malicious device HWIDs.", tut_step4: "Configure app maintenance, updates and UI colors here."
@@ -549,7 +740,7 @@
                 gd_keys_t: "कुंजी प्रबंधन", gd_keys_d: "उपयोगकर्ताओं को प्रबंधित करें। एडिट या अनलिंक बटन का उपयोग करके डिवाइस हटाएँ।",
                 gd_bans_t: "बैन सिस्टम", gd_bans_d: "दुर्भावनापूर्ण उपयोगकर्ताओं को उनका डिवाइस आईडी दर्ज करके ब्लॉक करें।",
                 gd_sys_t: "सिस्टम और रंग", gd_sys_d: "पैनल का रंग QR इमेज के अनुसार बदलता है।",
-                gd_sup_d: "मदद चाहिए? टेलीग्राम पर DPMods से संपर्क करें।",
+                gd_sup_d: "मदद चाहिए? टेलीग्राम पर Fahad से संपर्क करें।",
                 tut_prompt_t: "पैनल में आपका स्वागत है!", tut_prompt_d: "क्या आप जानना चाहते हैं कि पैनल का उपयोग कैसे करें?", tut_yes: "हाँ, शुरू करें", tut_no: "नहीं, छोड़ें",
                 tut_skip: "छोड़ें", tut_next: "अगला", tut_done: "संपन्न",
                 tut_step1: "नई कुंजी (Key) बनाने के लिए + बटन पर क्लिक करें।", tut_step2: "यह आपका की (Key) मैनेजर है। कार्ड से ही एडिट या अनलिंक करें।", tut_step3: "यहाँ आप हैकर्स के डिवाइस ब्लॉक कर सकते हैं।", tut_step4: "यहाँ से ऐप अपडेट और रंग बदलें।"
@@ -827,8 +1018,8 @@
                 img.src = url; img.style.display = 'block'; txt.style.display = 'none';
             } else {
                 img.style.display = 'none'; txt.style.display = 'block';
-                document.documentElement.style.setProperty('--ios-primary', '#007AFF');
-                document.documentElement.style.setProperty('--ios-primary-dim', 'rgba(0, 122, 255, 0.15)');
+                document.documentElement.style.setProperty('--ios-primary', '#4F7DFF');
+                document.documentElement.style.setProperty('--ios-primary-dim', 'rgba(79, 125, 255, 0.20)');
             }
         }
 
