@@ -655,7 +655,7 @@
                 <span class="app-main-title" id="page-title-text" data-i18n="nav_keys">Keys</span>
             </div>
             <div class="header-actions">
-                <button class="btn-icon" onclick="document.getElementById('lang-overlay').style.display='flex'"><i class="fas fa-globe"></i></button>
+                <button class="btn-icon" onclick="openLangOverlay()"><i class="fas fa-globe"></i></button>
                 <button class="btn-icon" onclick="fetchDatabase()"><i class="fas fa-sync-alt" id="reload-icon"></i></button>
                 <button class="btn-icon logout" onclick="logout()"><i class="fas fa-power-off"></i></button>
             </div>
@@ -1021,6 +1021,14 @@
         let savedUrls = JSON.parse(localStorage.getItem('dp_saved_urls')) || [];
         let isLoggedIn = false;
 
+        /* Opens the language overlay from the header globe button.
+           setLang() hides it with opacity:0 — resetting display alone would leave an
+           invisible full-screen layer (z-index 20000) that swallows every touch. */
+        function openLangOverlay() {
+            const o = document.getElementById('lang-overlay');
+            o.style.display = 'flex';
+            o.style.opacity = '1';
+        }
         function setLang(lang) {
             currentLang = lang;
             document.getElementById('lang-overlay').style.opacity = '0';
@@ -1030,9 +1038,13 @@
 
             setTimeout(() => {
                 document.getElementById('lang-overlay').style.display = 'none';
-                document.getElementById('login-screen').style.display = 'flex';
+                /* Only ask for a database URL when we are not connected yet —
+                   changing language inside the panel must not dump you back to login. */
+                if (typeof isLoggedIn === 'undefined' || !isLoggedIn) {
+                    document.getElementById('login-screen').style.display = 'flex';
+                    renderSavedUrls();
+                }
                 applyTranslations();
-                renderSavedUrls();
             }, 400);
         }
 
@@ -1179,8 +1191,10 @@
                     }
                     loadSystem(); renderKeys(); renderBans();
                     showIsland(trans('msg_success'), "success", "fa-sync-alt");
+                } else {
+                    showIsland("Not connected", "error");
                 }
-            } catch(e) {}
+            } catch(e) { showIsland("Sync Error", "error"); }
             icon.classList.remove('spin');
         }
 
