@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Fahad Admin Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     
     <style>
         :root {
@@ -223,7 +224,7 @@
                 radial-gradient(900px 720px at -18% 108%, rgba(34,211,238,0.18), transparent 62%),
                 linear-gradient(180deg, #070812 0%, #04050b 55%, #070812 100%);
         }
-        .flow-bg .blob { position: absolute; display: block; border-radius: 50%; filter: blur(64px); opacity: .5; will-change: transform; transform: translate3d(0,0,0); }
+        .flow-bg .blob { position: absolute; display: block; border-radius: 50%; filter: blur(44px); opacity: .5; will-change: transform; transform: translate3d(0,0,0); }
         .flow-bg .b1 { width: 56vmax; height: 56vmax; left: -20vmax; top: -22vmax; background: #4F7DFF; animation: flow1 26s ease-in-out infinite alternate; }
         .flow-bg .b2 { width: 50vmax; height: 50vmax; right: -22vmax; top: 16vmax; background: #22D3EE; opacity: .38; animation: flow2 34s ease-in-out infinite alternate; }
         .flow-bg .b3 { width: 46vmax; height: 46vmax; left: 10vmax; bottom: -26vmax; background: #7C5CFF; opacity: .44; animation: flow3 30s ease-in-out infinite alternate; }
@@ -259,8 +260,7 @@
 
         /* ---------- HEADER / SEARCH ---------- */
         .page-header, .search-bar-container {
-            background: linear-gradient(180deg, rgba(8,10,20,0.74), rgba(8,10,20,0.44));
-            backdrop-filter: blur(26px) saturate(180%); -webkit-backdrop-filter: blur(26px) saturate(180%);
+            background: linear-gradient(180deg, rgba(7,9,17,0.96), rgba(7,9,17,0.88));
             border-bottom: 1px solid rgba(255,255,255,0.07);
         }
         .page-header::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
@@ -338,8 +338,7 @@
         .saved-url-item { border-radius: 18px; }
 
         /* ---------- BOTTOM NAV ---------- */
-        .bottom-nav { background: linear-gradient(180deg, rgba(10,12,22,0.55), rgba(8,10,18,0.84));
-            backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%);
+        .bottom-nav { background: linear-gradient(180deg, rgba(10,12,22,0.94), rgba(8,10,18,0.97));
             border-top: 1px solid rgba(255,255,255,0.08); box-shadow: 0 -18px 44px -28px rgba(0,0,0,1); }
         .nav-item { border-radius: 18px; }
         .nav-item:active { transform: scale(0.9); }
