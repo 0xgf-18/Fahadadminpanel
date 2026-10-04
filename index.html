@@ -1219,6 +1219,21 @@
 
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
 
+        /* Snackbar / dynamic island toast — was referenced 16x but never defined,
+           which silently killed validation, error and success feedback. */
+        function showIsland(msg, type, icon) {
+            const el = document.getElementById('dynamic-island');
+            const ic = document.getElementById('di-icon');
+            const tx = document.getElementById('di-msg');
+            if (!el || !ic || !tx) return;
+            tx.textContent = (msg === undefined || msg === null || msg === '') ? 'Done' : String(msg);
+            ic.className = 'fas ' + (icon || (type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'));
+            ic.style.color = type === 'error' ? '#FF453A' : (type === 'success' ? '#32D74B' : 'var(--ios-primary)');
+            el.classList.add('show');
+            clearTimeout(window.__islandTimer);
+            window.__islandTimer = setTimeout(() => el.classList.remove('show'), 2600);
+        }
+
         function copyToClipboard(text, label, event) {
             if (event) event.stopPropagation(); 
             const el = document.createElement('textarea'); el.value = text;
