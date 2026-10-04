@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Premium iOS 26 Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* DYNAMIC iOS PRIMARY COLOR (Will sync with QR Image) */
+            --ios-primary: #007AFF; 
+            --ios-primary-dim: rgba(0, 122, 255, 0.15);
+            
+            --bg-base: #000000;
+            --bg-glass: rgba(28, 28, 30, 0.65);
+            --bg-glass-heavy: rgba(20, 20, 22, 0.85);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            
+            --text-main: #ffffff;
+            --text-dim: #ebebf599;
+            
+            --danger: #FF453A; 
+            --danger-dark: #8b0000;
+            --success: #32D74B; 
+            --warning: #FF9F0A;
+            --inactive: #8e8e93;
+            
+            --nav-height: 85px;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+        input, textarea, select { user-select: auto; font-family: inherit; } 
+        ::-webkit-scrollbar { display: none; }
+        
+        body { 
+            background: var(--bg-base); color: var(--text-main); 
+            min-height: 100dvh; overflow-x: hidden; overscroll-behavior-y: contain; 
+            background-image: radial-gradient(circle at top right, rgba(255,255,255,0.05), transparent 40%),
+                              radial-gradient(circle at bottom left, var(--ios-primary-dim), transparent 60%);
+            background-attachment: fixed;
+            transition: background-image 0.5s ease;
+        }
+
+        :focus-visible { outline: none; }
+
+        .app-container { max-width: 600px; margin: 0 auto; padding-bottom: calc(var(--nav-height) + 120px); display: flex; flex-direction: column; min-height: 100dvh; position: relative;}
+
+        /* --- CREDIT WATERMARK --- */
+        .watermark { position: absolute; bottom: calc(var(--nav-height) + 20px); left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.2); letter-spacing: 2px; text-transform: uppercase; z-index: 10; pointer-events: none; width: 100%; text-align: center;}
+        
+        /* --- DYNAMIC ISLAND NOTIFICATION --- */
+        #dynamic-island {
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%) scale(0.9);
+            background: #000000; color: #fff; border-radius: 40px; padding: 12px 24px;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            font-weight: 600; font-size: 0.95rem; letter-spacing: 0.3px; 
+            opacity: 0; pointer-events: none; z-index: 10000;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.1);
+            min-width: 150px;
+        }
+        #dynamic-island.show { opacity: 1; transform: translateX(-50%) scale(1); }
+
+        /* --- LANGUAGE SELECTOR OVERLAY --- */
+        #lang-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 20000; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; transition: 0.4s ease; padding: 20px;}
+        .lang-btn { background: var(--bg-glass); border: 1px solid var(--border-glass); padding: 16px 30px; border-radius: 20px; font-size: 1.1rem; font-weight: 700; color: #fff; cursor: pointer; width: 100%; max-width: 280px; text-align: center; transition: 0.3s;}
+        .lang-btn:active { transform: scale(0.95); background: var(--ios-primary); }
+
+        /* --- iOS CARDS & INPUTS --- */
+        .ios-card { background: var(--bg-glass); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); padding: 20px; border-radius: 24px; border: 1px solid var(--border-glass); box-shadow: 0 20px 40px rgba(0,0,0,0.3); margin-bottom: 16px;}
+        
+        .input-group { margin-bottom: 16px; text-align: start; width: 100%; }
+        .input-group label { display: block; font-size: 0.75rem; color: var(--text-dim); font-weight: 600; margin-bottom: 8px; padding: 0 10px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .input-group input, .input-group textarea, .input-group select { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 18px; padding: 16px 20px; color: #fff; font-size: 1rem; font-weight: 500; outline: none; transition: 0.3s; text-align: start;}
+        .input-group input:focus, .input-group textarea:focus { border-color: var(--ios-primary); background: rgba(255,255,255,0.05); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); }
+        .input-row { display: flex; gap: 12px; }
+        .input-row .input-group { flex: 1; margin-bottom: 8px; }
+
+        .ios-toggle { appearance: none; width: 44px; height: 26px; background: rgba(255,255,255,0.2); border-radius: 20px; position: relative; outline: none; cursor: pointer; transition: 0.3s; box-shadow: inset 0 0 5px rgba(0,0,0,0.2);}
+        .ios-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; background: #fff; border-radius: 50%; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 2px 4px rgba(0,0,0,0.3);}
+        .ios-toggle:checked { background: var(--success); }
+        .ios-toggle:checked::after { transform: translateX(18px); }
+        [dir="rtl"] .ios-toggle::after { right: 2px; left: auto; }
+        [dir="rtl"] .ios-toggle:checked::after { transform: translateX(-18px); }
+
+        .btn { width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.2s; color: #fff; font-family: inherit;}
+        .btn-primary { background: var(--ios-primary); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .btn-primary:active { transform: scale(0.97); opacity: 0.8;}
+
+        /* --- FIXED LOGIN SCREEN WITH iOS MESH BACKGROUND --- */
+        #login-screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; z-index: 500; transition: opacity 0.5s ease, transform 0.5s ease;
+            background-color: #000000;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(10, 132, 255, 0.3) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.3) 0px, transparent 50%);
+            animation: breathe 10s ease-in-out infinite alternate;
+        }
+        @keyframes breathe { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
+        
+        .login-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 360px; }
+        .logo-icon { font-size: 4.5rem; color: var(--ios-primary); margin-bottom: 10px; filter: drop-shadow(0 0 20px rgba(0, 122, 255, 0.4)); }
+        #login-screen h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.1; margin-bottom: 30px; text-transform: uppercase; letter-spacing: -1px; text-shadow: 0 0 15px rgba(255,255,255,0.2);}
+        
+        .saved-url-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 16px; border-radius: 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;}
+        .saved-url-item:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
+        .saved-url-text { font-size: 0.85rem; color: var(--text-dim); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 200px; text-align: start;}
+        
+        /* --- HEADER --- */
+        .page-header { padding: 40px 20px 15px; display: flex; justify-content: space-between; align-items: flex-end; position: sticky; top: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 50; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .app-main-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; color: #fff;}
+        .header-actions { display: flex; gap: 10px; align-items: center;}
+        .btn-icon { background: rgba(255,255,255,0.1); color: #fff; width: 40px; height: 40px; border-radius: 20px; font-size: 1rem; border: none; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s;}
+        .btn-icon:active { transform: scale(0.9); opacity: 0.7; }
+
+        /* --- SEARCH & PILL FILTERS --- */
+        .search-bar-container { padding: 15px 20px 0; position: sticky; top: 85px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 49; }
+        .search-bar { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid var(--border-glass); border-radius: 16px; padding: 14px 16px 14px 44px; color: #fff; font-size: 1rem; outline: none; font-weight: 500; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%23ebebf599'%3E%3Cpath d='M416 208c0 45.9-14.9 88.3-40 122.7L502.6 456.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 16px center; background-size: 16px; transition: 0.3s;}
+        .search-bar:focus { border-color: var(--ios-primary); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); }
+
+        .filter-chips-row { display: flex; gap: 8px; overflow-x: auto; padding: 15px 0 15px; scrollbar-width: none; }
+        .filter-chips-row::-webkit-scrollbar { display: none; }
+        .filter-chip { background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); color: var(--text-dim); padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize; cursor: pointer; white-space: nowrap; transition: 0.3s; }
+        .filter-chip.active { background: var(--text-main); color: #000; font-weight: 700; border-color: var(--text-main); box-shadow: 0 4px 10px rgba(255,255,255,0.2);}
+
+        /* --- LISTS & CARDS --- */
+        .content-area { padding: 0 20px; display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+        
+        .list-card { background: var(--bg-glass); border-radius: 24px; padding: 16px; border: 1px solid var(--border-glass); transition: 0.3s ease; display: flex; flex-direction: column; gap: 12px;}
+        
+        /* Status Dot */
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 10px currentColor;}
+
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-title { font-size: 1.2rem; font-weight: 800; color: #fff; display: flex; align-items: center; font-family: var(--font-code);}
+
+        .device-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.02); font-size: 0.85rem;}
+        
+        .interactive-text { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;}
+        .interactive-text:active { opacity: 0.5; }
+
+        .card-actions { display: flex; gap: 8px; margin-top: 4px;}
+        .btn-xs { flex: 1; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; color: #fff; background: rgba(255,255,255,0.08); border: none; display: flex; justify-content: center; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-xs:active { transform: scale(0.95); background: rgba(255,255,255,0.15);}
+        .btn-xs.edit { color: var(--ios-primary); }
+        .btn-xs.unlink { color: var(--warning); }
+        .btn-xs.del { color: var(--danger); }
+
+        /* --- GLOBAL FLOATING ACTION BUTTONS --- */
+        /* Hidden by default, only shown after successful login */
+        .fab-global { position: fixed; bottom: calc(var(--nav-height) + 20px); right: 24px; width: 60px; height: 60px; border-radius: 30px; color: #fff; border: none; font-size: 1.5rem; display: none; justify-content: center; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); cursor: pointer; z-index: 1000; transition: transform 0.2s ease, opacity 0.3s ease; }
+        [dir="rtl"] .fab-global { right: auto; left: 24px; }
+        .fab-global:active { transform: scale(0.9); }
+        #fab-add-key { background: var(--ios-primary); }
+        #fab-add-ban { background: var(--danger); }
+
+        /* --- iOS BOTTOM MODALS --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; justify-content: center; align-items: flex-end; z-index: 2000; opacity: 0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1); }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-card { background: var(--bg-glass-heavy); width: 100%; max-width: 600px; border-radius: 32px 32px 0 0; padding: 20px 20px 30px; transform: translateY(100%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1); border-top: 1px solid var(--border-glass); max-height: 90vh; overflow-y: auto;}
+        .modal-overlay.active .modal-card { transform: translateY(0); }
+        .modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; margin: -5px auto 20px; }
+        
+        /* --- BOTTOM NAV --- */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height); background: rgba(20,20,22,0.85); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { color: var(--text-dim); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.6rem; font-weight: 600; cursor: pointer; transition: 0.3s; flex: 1; padding: 8px; }
+        .nav-item.active { color: var(--ios-primary); }
+        .nav-item i { font-size: 1.3rem; transition: 0.3s; }
+        .nav-item.active i { transform: scale(1.1); }
+
+        /* --- ANIMATIONS (Smooth View Switching) --- */
+        .view { display: none; opacity: 0; }
+        .view.active { display: block; animation: smoothFadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1) forwards; }
+        @keyframes smoothFadeIn { 
+            0% { opacity: 0; transform: scale(0.98) translateY(10px); } 
+            100% { opacity: 1; transform: scale(1) translateY(0); } 
+        }
+        
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--text-dim); font-weight: 600; font-size: 0.9rem; }
+
+        /* Guide Card UI */
+        .guide-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; margin-bottom: 12px; text-align: start;}
+        .guide-card h3 { color: var(--ios-primary); font-size: 1rem; margin-bottom: 6px;}
+        .guide-card p { font-size: 0.8rem; color: #ccc; line-height: 1.4;}
+        .legend-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; color: #fff;}
+
+        /* --- TUTORIAL OVERLAY --- */
+        #tutorial-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 30000; display: none; flex-direction: column; align-items: center;}
+        .tut-tooltip { position: absolute; background: var(--ios-primary); color: #fff; padding: 16px; border-radius: 16px; width: 80%; max-width: 300px; text-align: center; font-weight: 600; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.8); animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1); }
+        .tut-tooltip::after { content:''; position:absolute; border: 10px solid transparent; }
+        .tut-tooltip.top-arrow::after { bottom: -18px; left: 50%; transform: translateX(-50%); border-top-color: var(--ios-primary); }
+        .tut-tooltip.bottom-arrow::after { top: -18px; left: 50%; transform: translateX(-50%); border-bottom-color: var(--ios-primary); }
+        @keyframes pop { 0% { transform: scale(0.8); opacity: 0;} 100% { transform: scale(1); opacity: 1;} }
+    </style>
+</head>
+<body dir="ltr">
+
+    <!-- DYNAMIC ISLAND SNACKBAR -->
+    <div id="dynamic-island">
+        <i id="di-icon" class="fas fa-check-circle" style="color: var(--ios-primary);"></i> 
+        <span id="di-msg">Action Successful</span>
+    </div>
+
+    <!-- LANGUAGE OVERLAY -->
+    <div id="lang-overlay">
+        <h2 style="color:#fff; font-weight:800; margin-bottom:10px; text-align:center;">Select Language</h2>
+        <div class="lang-btn" onclick="setLang('en')">English (Default)</div>
+        <div class="lang-btn" onclick="setLang('hi')">हिन्दी (Hindi)</div>
+        <div class="lang-btn" onclick="setLang('es')">Español (Spanish)</div>
+        <div class="lang-btn" onclick="setLang('bn')">বাংলা (Bangla)</div>
+        <div class="lang-btn" onclick="setLang('ar')">العربية (Arabic)</div>
+    </div>
+
+    <!-- FIREBASE LOGIN SCREEN -->
+    <div id="login-screen" style="display:none;">
+        <div class="login-wrapper">
+            <div class="logo-icon"><i class="fas fa-fingerprint"></i></div>
+            <h1 data-i18n="login_title">ACCESS PANEL</h1>
+            
+            <div class="ios-card" style="width: 100%; padding: 24px; margin-bottom:15px;">
+                <div class="input-group">
+                    <label data-i18n="lbl_db_url">Firebase Database URL</label>
+                    <input type="text" id="auth-url" placeholder="https://database.firebaseio.com">
+                </div>
+                <button id="login-btn" class="btn btn-primary" onclick="login()" style="margin-top: 10px;" data-i18n="btn_connect">CONNECT</button>
+            </div>
+            
+            <!-- Saved Connections List -->
+            <div id="saved-connections" style="width: 100%; text-align: start; display: none;">
+                <h4 style="color: var(--text-dim); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 8px; margin-left: 10px;" data-i18n="lbl_saved_conn">Recent Connections</h4>
+                <div id="saved-url-list"></div>
+            </div>
+
+            <div style="margin-top: 15px; font-size: 0.75rem; color: var(--text-dim);" data-i18n="lbl_rules_hint">* Ensure Firebase Rules are set to true.</div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div class="app-container" id="main-app" style="display: none;">
+        
+        <div class="page-header">
+            <div class="header-title-box">
+                <span class="app-main-title" id="page-title-text" data-i18n="nav_keys">Keys</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" onclick="document.getElementById('lang-overlay').style.display='flex'"><i class="fas fa-globe"></i></button>
+                <button class="btn-icon" onclick="fetchDatabase()"><i class="fas fa-sync-alt" id="reload-icon"></i></button>
+                <button class="btn-icon logout" onclick="logout()"><i class="fas fa-power-off"></i></button>
+            </div>
+        </div>
+
+        <!-- KEYS VIEW -->
+        <div id="view-keys" class="view active">
+            <div class="search-bar-container">
+                <div class="input-group" style="margin-bottom: 10px;">
+                    <input type="text" class="search-bar" id="search-keys" placeholder="Search Keys, Client, or Device..." oninput="renderKeys()">
+                </div>
+                <div class="filter-chips-row">
+                    <div class="filter-chip active" onclick="setFilter('all', this)" data-i18n="filt_all">All</div>
+                    <div class="filter-chip" onclick="setFilter('active', this)" data-i18n="filt_act">Active</div>
+                    <div class="filter-chip" onclick="setFilter('inactive', this)" data-i18n="filt_inact">Inactive</div>
+                    <div class="filter-chip" onclick="setFilter('nearby', this)" data-i18n="filt_near">Expiring Soon</div>
+                    <div class="filter-chip" onclick="setFilter('expired', this)" data-i18n="filt_exp">Expired</div>
+                    <div class="filter-chip" onclick="setFilter('banned', this)" data-i18n="filt_ban">Banned</div>
+                </div>
+            </div>
+            <div class="content-area" id="keys-list"></div>
+        </div>
+
+        <!-- BANS VIEW -->
+        <div id="view-bans" class="view">
+            <div class="content-area" id="bans-list"></div>
+        </div>
+
+        <!-- SYSTEM VIEW -->
+        <div id="view-system" class="view">
+            <div class="content-area">
+                
+                <div class="ios-card">
+                    <h3 style="margin-bottom: 15px; color:var(--ios-primary); font-size:0.9rem; text-transform:uppercase;" data-i18n="sys_ui"><i class="fas fa-paint-brush"></i> UI Settings</h3>
+                    
+                    <div style="width:100%; height:120px; background:rgba(0,0,0,0.5); border-radius:14px; margin-bottom:12px; overflow:hidden; display:flex; justify-content:center; align-items:center; border:1px solid rgba(255,255,255,0.1);">
+                        <img id="preview-qr" src="" style="max-width:100%; max-height:100%; object-fit:contain; display:none;" crossorigin="anonymous">
+                        <span id="preview-txt" style="color:var(--text-dim); font-size:0.8rem;">No Image Loaded</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label data-i18n="sys_qr">QR Image URL (Changes Panel Color)</label>
+                        <input type="text" id="sys-qr-url" placeholder="https://..." oninput="updateQRPreview()">
+                    </div>
+                    <div class="input-group">
+                        <label data-i18n="sys_admin">Admin Contact URL</label>
+                        <input type="text" id="sys-admin-url">
+                    </div>
+                </div>
+
+                <div class="ios-card">
+                    <h3 style="margin-bottom: 15px; color:var(--warning); font-size:0.9rem; text-transform:uppercase;" data-i18n="sys_maint"><i class="fas fa-tools"></i> Maintenance & Update</h3>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding: 10px 0;">
+                        <span style="font-weight:600; font-size:0.95rem;" data-i18n="sys_maint_en">Enable Maintenance</span>
+                        <input type="checkbox" class="ios-toggle" id="chk-maint">
+                    </div>
+                    <div class="input-group">
+                        <textarea id="sys-maint-msg" rows="2"></textarea>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; margin-top:20px; padding: 10px 0;">
+                        <span style="font-weight:600; font-size:0.95rem;" data-i18n="sys_upd_en">Force Update</span>
+                        <input type="checkbox" class="ios-toggle" id="chk-update">
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group"><label data-i18n="sys_upd_ver">Version Code</label><input type="number" id="sys-upd-ver"></div>
+                    </div>
+                    <div class="input-group">
+                        <label data-i18n="sys_upd_msg">Update Message</label>
+                        <textarea id="sys-upd-msg" rows="2"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label data-i18n="sys_upd_url">Update URL</label>
+                        <input type="text" id="sys-upd-url">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="saveSystem()" style="margin-bottom:20px;" data-i18n="btn_save">SAVE SETTINGS</button>
+            </div>
+        </div>
+
+        <!-- GUIDE VIEW -->
+        <div id="view-guide" class="view">
+            <div class="content-area">
+                <!-- Status Indicators Guide -->
+                <div class="guide-card">
+                    <h3 data-i18n="gd_status_t"><i class="fas fa-circle"></i> Status Color Guide</h3>
+                    <p data-i18n="gd_status_d" style="margin-bottom: 12px;">Understand the key status by looking at the color dot next to the key ID.</p>
+                    
+                    <div class="legend-row"><span class="status-dot" style="background:var(--success); color:var(--success);"></span> <strong>Active</strong> - Linked and working.</div>
+                    <div class="legend-row"><span class="status-dot" style="background:var(--inactive); color:var(--inactive);"></span> <strong style="color:var(--text-dim);">Inactive</strong> - Unused, waiting.</div>
+                    <div class="legend-row"><span class="status-dot" style="background:var(--warning); color:var(--warning);"></span> <strong style="color:var(--warning);">Expiring Soon</strong> - Expires within 3 days.</div>
+                    <div class="legend-row"><span class="status-dot" style="background:var(--danger); color:var(--danger);"></span> <strong style="color:var(--danger);">Expired</strong> - Validity over.</div>
+                    <div class="legend-row"><span class="status-dot" style="background:var(--danger-dark); color:var(--danger-dark);"></span> <strong style="color:var(--danger-dark);">Banned</strong> - Device HWID is blocked.</div>
+                </div>
+
+                <div class="guide-card">
+                    <h3 data-i18n="gd_keys_t"><i class="fas fa-key"></i> Keys Management</h3>
+                    <p data-i18n="gd_keys_d">Manage user access. Generate single or bulk keys. Optional client details can be added and searched.</p>
+                </div>
+                <div class="guide-card">
+                    <h3 data-i18n="gd_bans_t"><i class="fas fa-user-slash"></i> Ban System</h3>
+                    <p data-i18n="gd_bans_d">Block malicious users by entering their Device ID (HWID). Blocked devices cannot access the app.</p>
+                </div>
+                <div class="guide-card" style="border-color: var(--ios-primary); background: rgba(0, 122, 255, 0.05);">
+                    <h3><i class="fab fa-telegram"></i> Developer Support</h3>
+                    <p data-i18n="gd_sup_d">Need help with the panel or custom modifications? Contact DPMods on Telegram.</p>
+                    <div class="interactive-text" style="color:var(--ios-primary); font-weight:800; font-size:1.1rem; margin-top:10px;" onclick="copyToClipboard('@dpmodsdialog', 'Telegram ID', event)">
+                        @dpmodsdialog <i class="fas fa-copy"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PANEL CREDIT WATERMARK -->
+        <div class="watermark"><span data-i18n="watermark_txt">PANEL BY</span> <span style="color:var(--ios-primary);">FAHAD</span></div>
+    </div>
+
+    <!-- GLOBAL FLOATING BUTTONS (FIXED OUTSIDE CONTAINER TO PREVENT CLIPPING) -->
+    <!-- Display is controlled via JS ONLY AFTER LOGIN -->
+    <button class="fab-global" id="fab-add-key" onclick="openKeyModal()"><i class="fas fa-plus"></i></button>
+    <button class="fab-global" id="fab-add-ban" onclick="openBanModal()" style="background:var(--danger);"><i class="fas fa-ban"></i></button>
+
+    <!-- MODALS -->
+
+    <!-- Add Key Modal -->
+    <div class="modal-overlay" id="key-modal">
+        <div class="modal-card">
+            <div class="modal-handle"></div>
+            <h2 style="font-size:1.2rem; font-weight:800; text-align:center; margin-bottom:20px; color:#fff;" data-i18n="mod_key_title">Generate Key</h2>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:12px; background:rgba(255,255,255,0.05); border-radius:14px;">
+                <span style="font-weight:600; font-size:0.95rem;" data-i18n="mod_bulk_en">Generate Bulk Keys</span>
+                <input type="checkbox" class="ios-toggle" id="chk-bulk" onchange="document.getElementById('bulk-qty-row').style.display = this.checked ? 'block' : 'none'; document.getElementById('single-key-row').style.display = this.checked ? 'none' : 'block';">
+            </div>
+
+            <!-- Single Key Input -->
+            <div class="input-group" id="single-key-row">
+                <label data-i18n="mod_lbl_key">6-Digit Access Key</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="number" id="mod-key-id" placeholder="e.g. 112233" style="font-family: var(--font-code);" oninput="enforceNumeric(this)">
+                    <button class="btn" style="width:55px; background:rgba(255,255,255,0.1); padding:0; border:1px solid var(--border-glass);" onclick="randomKey()"><i class="fas fa-dice" style="color:var(--ios-primary);"></i></button>
+                </div>
+            </div>
+
+            <!-- Bulk Qty Input -->
+            <div class="input-group" id="bulk-qty-row" style="display:none;">
+                <label data-i18n="mod_lbl_qty">Quantity to Generate</label>
+                <input type="number" id="mod-bulk-qty" value="5" min="2" max="50">
+            </div>
+
+            <div class="input-group">
+                <label data-i18n="mod_lbl_exp">Expiry Date</label>
+                <input type="date" id="mod-key-date">
+            </div>
+
+            <!-- Client Info (Optional) -->
+            <div class="input-group">
+                <label data-i18n="mod_lbl_cname">Client Name (Optional)</label>
+                <input type="text" id="mod-key-cname" placeholder="e.g. John Doe">
+            </div>
+            <div class="input-group">
+                <label data-i18n="mod_lbl_cpay">Payment Info (Optional)</label>
+                <input type="text" id="mod-key-cpay" placeholder="e.g. Paid $10 via PayPal">
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <button class="btn" style="background: rgba(255,255,255,0.1);" onclick="closeModals()" data-i18n="btn_cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="saveKey()"><span id="modal-key-btn-text" data-i18n="btn_save">Generate</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Key Modal -->
+    <div class="modal-overlay" id="edit-key-modal">
+        <div class="modal-card">
+            <div class="modal-handle"></div>
+            <h2 class="modal-title" style="color:var(--ios-primary);" data-i18n="mod_edit_title">Edit Key</h2>
+            
+            <div class="input-group">
+                <label>Key ID</label>
+                <input type="text" id="edit-key-id" readonly style="opacity:0.6; font-family:var(--font-code);">
+            </div>
+            <div class="input-group">
+                <label data-i18n="mod_lbl_bind">Bind ID (HWID)</label>
+                <input type="text" id="edit-key-hwid" placeholder="Leave empty to unlink" style="font-family:var(--font-code);">
+            </div>
+            <div class="input-group">
+                <label data-i18n="mod_lbl_exp">Expiry Date</label>
+                <input type="date" id="edit-key-date">
+            </div>
+            <div class="input-group">
+                <label data-i18n="mod_lbl_cname">Client Name</label>
+                <input type="text" id="edit-key-cname">
+            </div>
+            <div class="input-group">
+                <label data-i18n="mod_lbl_cpay">Payment Info</label>
+                <input type="text" id="edit-key-cpay">
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 25px;">
+                <button class="btn" style="background: rgba(255,255,255,0.1);" onclick="closeModals()" data-i18n="btn_cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEditedKey()" data-i18n="btn_save">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Ban Modal -->
+    <div class="modal-overlay" id="ban-modal">
+        <div class="modal-card">
+            <div class="modal-handle"></div>
+            <h2 class="modal-title" style="color: var(--danger);" data-i18n="mod_ban_title">Block Hardware</h2>
+            
+            <div class="input-group">
+                <label data-i18n="mod_lbl_hwid">HWID to Block</label>
+                <input type="text" id="mod-ban-id" placeholder="e.g. hacker_device_123" style="font-family: var(--font-code);">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn" style="background: rgba(255,255,255,0.1);" onclick="closeModals()" data-i18n="btn_cancel">Cancel</button>
+                <button class="btn" style="background: var(--danger);" onclick="saveBan()" data-i18n="btn_block">Block</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Tutorial Overlay -->
+    <div id="tutorial-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 30000; display: none; flex-direction: column; align-items: center;">
+        <div class="tut-tooltip top-arrow" id="tut-tooltip" style="position: absolute; background: var(--ios-primary); color: #fff; padding: 16px; border-radius: 16px; width: 80%; max-width: 300px; text-align: center; font-weight: 600; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.8); transition: 0.4s ease;">
+            <p id="tut-text" style="margin-bottom:12px;"></p>
+            <div style="display:flex; justify-content:space-between; gap:10px;">
+                <button style="flex:1; padding:8px; border-radius:10px; border:none; background:rgba(0,0,0,0.3); color:#fff; font-weight:600; cursor:pointer;" onclick="endTutorial()" data-i18n="tut_skip">Skip</button>
+                <button style="flex:1; padding:8px; border-radius:10px; border:none; background:#fff; color:var(--ios-primary); font-weight:700; cursor:pointer;" onclick="nextTutorialStep()" id="tut-next-btn" data-i18n="tut_next">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="tut-prompt">
+        <div class="modal-card" style="text-align:center;">
+            <i class="fas fa-magic" style="font-size:3rem; color:var(--ios-primary); margin-bottom:15px;"></i>
+            <h2 style="color:#fff; margin-bottom:10px;" data-i18n="tut_prompt_t">Welcome to Panel!</h2>
+            <p style="color:var(--text-dim); font-size:0.95rem; margin-bottom:25px;" data-i18n="tut_prompt_d">Would you like a quick interactive tutorial on how to use the panel?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" style="background: rgba(255,255,255,0.1);" onclick="closeTutPrompt()" data-i18n="tut_no">No, skip</button>
+                <button class="btn btn-primary" onclick="startTutorial()" data-i18n="tut_yes">Yes, start</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVBAR -->
+    <div class="bottom-nav" id="bottom-nav" style="display: none;">
+        <div class="nav-item active" onclick="nav('keys', this, trans('nav_keys'))" id="nav-tab-keys">
+            <i class="fas fa-key"></i><span data-i18n="nav_keys">Keys</span>
+        </div>
+        <div class="nav-item" onclick="nav('bans', this, trans('nav_bans'))" id="nav-tab-bans">
+            <i class="fas fa-user-slash"></i><span data-i18n="nav_bans">Bans</span>
+        </div>
+        <div class="nav-item" onclick="nav('system', this, trans('nav_sys'))" id="nav-tab-sys">
+            <i class="fas fa-cogs"></i><span data-i18n="nav_sys">System</span>
+        </div>
+        <div class="nav-item" onclick="nav('guide', this, trans('nav_guide'))" id="nav-tab-guide">
+            <i class="fas fa-book"></i><span data-i18n="nav_guide">Guide</span>
+        </div>
+    </div>
+
+    <script>
+        // --- TRANSLATION DICTIONARY ---
+        const i18n = {
+            en: {
+                login_title: "ACCESS PANEL", lbl_db_url: "Firebase Database URL", btn_connect: "CONNECT", lbl_rules_hint: "* Ensure Firebase Rules are set to true.",
+                lbl_saved_conn: "Recent Connections",
+                nav_keys: "Keys", nav_bans: "Bans", nav_sys: "System", nav_guide: "Guide",
+                sys_ui: "UI Settings", sys_qr: "QR Image URL (Changes Color)", sys_title: "Title", sys_sub: "Subtitle", sys_admin: "Admin Contact URL",
+                sys_maint: "Maintenance & Update", sys_maint_en: "Enable Maintenance", sys_upd_en: "Force Update", sys_upd_ver: "Version Code", sys_upd_msg: "Update Message", sys_upd_url: "Update URL",
+                btn_save: "Save Settings", watermark_txt: "PANEL BY",
+                filt_all: "All", filt_act: "Active", filt_inact: "Inactive", filt_near: "Expiring Soon", filt_exp: "Expired", filt_ban: "Banned",
+                mod_key_title: "Generate Key", mod_bulk_en: "Generate Bulk Keys", mod_lbl_key: "6-Digit Access Key", mod_lbl_qty: "Quantity to Generate", mod_lbl_exp: "Expiry Date", mod_lbl_cname: "Client Name (Optional)", mod_lbl_cpay: "Payment Info (Optional)",
+                mod_edit_title: "Edit Configuration", mod_lbl_bind: "Bind ID (HWID)", mod_ban_title: "Block Hardware", mod_lbl_hwid: "HWID to Block", btn_block: "Block", btn_cancel: "Cancel",
+                err_rules: "Please set Firebase rules to true true.", err_url: "Enter Firebase URL!", msg_success: "Action Successful!", msg_copy: "Copied!", empty_keys: "No Keys Found", empty_bans: "No Banned Devices",
+                gd_status_t: "Status Color Guide", gd_status_d: "Understand the key status by looking at the color dot next to the key ID.",
+                gd_keys_t: "Keys Management", gd_keys_d: "Manage user access. Generate single or bulk 6-digit numeric keys. Use the Edit or Unlink buttons to modify devices.",
+                gd_bans_t: "Ban System", gd_bans_d: "Block malicious users by entering their Device ID (HWID). Blocked devices cannot access the app.",
+                gd_sys_t: "System & Color", gd_sys_d: "Configure Maintenance, Force Update, and UI text. The panel color automatically adapts to the dominant color of the QR Image URL.",
+                gd_sup_d: "Need help with the panel or custom modifications? Contact DPMods on Telegram.",
+                tut_prompt_t: "Welcome to Panel!", tut_prompt_d: "Would you like a quick interactive tutorial on how to use the panel?", tut_yes: "Yes, start", tut_no: "No, skip",
+                tut_skip: "Skip", tut_next: "Next", tut_done: "Done",
+                tut_step1: "Click the + button to generate single or bulk keys.", tut_step2: "This is your Keys manager. You can Unlink, Edit, or Delete them directly from the card.", tut_step3: "Here you can completely ban malicious device HWIDs.", tut_step4: "Configure app maintenance, updates and UI colors here."
+            },
+            hi: {
+                login_title: "एक्सेस पैनल", lbl_db_url: "फायरबेस डेटाबेस URL", btn_connect: "कनेक्ट करें", lbl_rules_hint: "* सुनिश्चित करें कि फायरबेस रूल्स true पर सेट हैं।",
+                lbl_saved_conn: "हाल के कनेक्शन",
+                nav_keys: "कुंजियाँ", nav_bans: "बैन लिस्ट", nav_sys: "सिस्टम", nav_guide: "गाइड",
+                sys_ui: "UI सेटिंग्स", sys_qr: "QR इमेज URL (रंग बदलता है)", sys_title: "शीर्षक", sys_sub: "उपशीर्षक", sys_admin: "एडमिन संपर्क URL",
+                sys_maint: "रखरखाव और अपडेट", sys_maint_en: "रखरखाव मोड चालू करें", sys_upd_en: "अपडेट अनिवार्य करें", sys_upd_ver: "वर्जन कोड", sys_upd_msg: "अपडेट संदेश", sys_upd_url: "अपडेट URL",
+                btn_save: "सेटिंग्स सेव करें", watermark_txt: "पैनल द्वारा",
+                filt_all: "सभी", filt_act: "सक्रिय", filt_inact: "निष्क्रिय", filt_near: "जल्द समाप्त", filt_exp: "समाप्त", filt_ban: "प्रतिबंधित",
+                mod_key_title: "नई कुंजी बनाएं", mod_bulk_en: "एक साथ कई कुंजियाँ बनाएं", mod_lbl_key: "6-अंकों की कुंजी", mod_lbl_qty: "मात्रा", mod_lbl_exp: "समाप्ति तिथि", mod_lbl_cname: "क्लाइंट का नाम (वैकल्पिक)", mod_lbl_cpay: "पेमेंट विवरण (वैकल्पिक)",
+                mod_edit_title: "बदलाव करें", mod_lbl_bind: "डिवाइस ID (HWID)", mod_ban_title: "डिवाइस ब्लॉक करें", mod_lbl_hwid: "ब्लॉक करने के लिए HWID", btn_block: "ब्लॉक करें", btn_cancel: "रद्द करें",
+                err_rules: "कृपया फायरबेस रूल्स को true true पर सेट करें।", err_url: "फायरबेस URL दर्ज करें!", msg_success: "सफलतापूर्वक पूर्ण!", msg_copy: "कॉपी किया गया!", empty_keys: "कोई कुंजी नहीं मिली", empty_bans: "कोई बैन डिवाइस नहीं",
+                gd_status_t: "रंग के डॉट्स का मतलब", gd_status_d: "कुंजी के आगे लगे रंग के डॉट को देखकर उसकी स्थिति समझें।",
+                gd_keys_t: "कुंजी प्रबंधन", gd_keys_d: "उपयोगकर्ताओं को प्रबंधित करें। एडिट या अनलिंक बटन का उपयोग करके डिवाइस हटाएँ।",
+                gd_bans_t: "बैन सिस्टम", gd_bans_d: "दुर्भावनापूर्ण उपयोगकर्ताओं को उनका डिवाइस आईडी दर्ज करके ब्लॉक करें।",
+                gd_sys_t: "सिस्टम और रंग", gd_sys_d: "पैनल का रंग QR इमेज के अनुसार बदलता है।",
+                gd_sup_d: "मदद चाहिए? टेलीग्राम पर DPMods से संपर्क करें।",
+                tut_prompt_t: "पैनल में आपका स्वागत है!", tut_prompt_d: "क्या आप जानना चाहते हैं कि पैनल का उपयोग कैसे करें?", tut_yes: "हाँ, शुरू करें", tut_no: "नहीं, छोड़ें",
+                tut_skip: "छोड़ें", tut_next: "अगला", tut_done: "संपन्न",
+                tut_step1: "नई कुंजी (Key) बनाने के लिए + बटन पर क्लिक करें।", tut_step2: "यह आपका की (Key) मैनेजर है। कार्ड से ही एडिट या अनलिंक करें।", tut_step3: "यहाँ आप हैकर्स के डिवाइस ब्लॉक कर सकते हैं।", tut_step4: "यहाँ से ऐप अपडेट और रंग बदलें।"
+            },
+            es: {
+                login_title: "PANEL DE ACCESO", lbl_db_url: "URL de Firebase", btn_connect: "CONECTAR", lbl_rules_hint: "* Reglas de Firebase deben ser 'true'.",
+                lbl_saved_conn: "Conexiones Recientes",
+                nav_keys: "Claves", nav_bans: "Baneos", nav_sys: "Sistema", nav_guide: "Guía",
+                sys_ui: "IU Ajustes", sys_qr: "URL de imagen QR (Color)", sys_title: "Título", sys_sub: "Subtítulo", sys_admin: "URL de admin",
+                sys_maint: "Mantenimiento", sys_maint_en: "Activar mantenimiento", sys_upd_en: "Forzar actualización", sys_upd_ver: "Versión", sys_upd_msg: "Mensaje", sys_upd_url: "URL de actualización",
+                btn_save: "Guardar", watermark_txt: "PANEL POR",
+                filt_all: "Todos", filt_act: "Activo", filt_inact: "Inactivo", filt_near: "Por expirar", filt_exp: "Expirado", filt_ban: "Baneado",
+                mod_key_title: "Generar Clave", mod_bulk_en: "Claves masivas", mod_lbl_key: "Clave de 6 dígitos", mod_lbl_qty: "Cantidad", mod_lbl_exp: "Expiración", mod_lbl_cname: "Nombre del Cliente", mod_lbl_cpay: "Info de Pago",
+                mod_edit_title: "Editar", mod_lbl_bind: "HWID", mod_ban_title: "Bloquear", mod_lbl_hwid: "HWID a bloquear", btn_block: "Bloquear", btn_cancel: "Cancelar",
+                err_rules: "Reglas Firebase a true true.", err_url: "Ingrese URL!", msg_success: "¡Exitoso!", msg_copy: "¡Copiado!", empty_keys: "Sin claves", empty_bans: "Sin baneos",
+                gd_status_t: "Guía de colores", gd_status_d: "Comprenda el estado mediante el punto de color.",
+                gd_keys_t: "Claves", gd_keys_d: "Gestione accesos. Use los botones Editar o Desvincular.", gd_bans_t: "Baneos", gd_bans_d: "Bloquear HWID.", gd_sys_t: "Sistema", gd_sys_d: "El color se adapta a la imagen.", gd_sup_d: "Soporte en Telegram.",
+                tut_prompt_t: "¡Bienvenido!", tut_prompt_d: "¿Desea un tutorial rápido?", tut_yes: "Sí", tut_no: "No",
+                tut_skip: "Saltar", tut_next: "Sig.", tut_done: "Fin",
+                tut_step1: "Haga clic en + para generar claves.", tut_step2: "Puede Editar, Desvincular o Eliminar aquí.", tut_step3: "Gestione dispositivos bloqueados.", tut_step4: "Configure el sistema aquí."
+            },
+            bn: {
+                login_title: "অ্যাক্সেস প্যানেল", lbl_db_url: "ফায়ারবেস URL", btn_connect: "সংযোগ করুন", lbl_rules_hint: "* ফায়ারবেস নিয়ম true সেট করুন।",
+                lbl_saved_conn: "সাম্প্রতিক সংযোগগুলি",
+                nav_keys: "কী (Keys)", nav_bans: "ব্যান", nav_sys: "সিস্টেম", nav_guide: "গাইড",
+                sys_ui: "UI সেটিংস", sys_qr: "QR ইমেজ URL", sys_title: "শিরোনাম", sys_sub: "উপশিরোনাম", sys_admin: "অ্যাডমিন URL",
+                sys_maint: "রক্ষণাবেক্ষণ", sys_maint_en: "রক্ষণাবেক্ষণ চালু করুন", sys_upd_en: "আপডেট বাধ্য করুন", sys_upd_ver: "ভার্সন", sys_upd_msg: "আপডেট বার্তা", sys_upd_url: "আপডেট URL",
+                btn_save: "সংরক্ষণ করুন", watermark_txt: "প্যানেল",
+                filt_all: "সব", filt_act: "সক্রিয়", filt_inact: "নিষ্ক্রিয়", filt_near: "শীঘ্রই শেষ", filt_exp: "মেয়াদোত্তীর্ণ", filt_ban: "নিষিদ্ধ",
+                mod_key_title: "কী তৈরি করুন", mod_bulk_en: "বাল্ক কী", mod_lbl_key: "৬-ডিজিটের কী", mod_lbl_qty: "পরিমাণ", mod_lbl_exp: "মেয়াদ শেষ", mod_lbl_cname: "ক্লায়েন্টের নাম", mod_lbl_cpay: "পেমেন্ট তথ্য",
+                mod_edit_title: "পরিবর্তন", mod_lbl_bind: "HWID", mod_ban_title: "ব্লক করুন", mod_lbl_hwid: "ব্লক করার HWID", btn_block: "ব্লক", btn_cancel: "বাতিল",
+                err_rules: "দয়া করে ফায়ারবেস নিয়ম true true সেট করুন।", err_url: "URL দিন!", msg_success: "সফল!", msg_copy: "কপি করা হয়েছে!", empty_keys: "কোনো কী নেই", empty_bans: "কোনো ব্যান নেই",
+                gd_status_t: "রঙ গাইড", gd_status_d: "রঙের বিন্দু দেখে অবস্থা বুঝুন।",
+                gd_keys_t: "কী ব্যবস্থাপনা", gd_keys_d: "আনলিঙ্ক বা সম্পাদনা বোতাম ব্যবহার করুন।", gd_bans_t: "ব্যান সিস্টেম", gd_bans_d: "HWID ব্লক করুন।", gd_sys_t: "সিস্টেম", gd_sys_d: "প্যানেলের রঙ ইমেজের উপর ভিত্তি করে পরিবর্তিত হয়।", gd_sup_d: "টেলিগ্রামে যোগাযোগ করুন।",
+                tut_prompt_t: "স্বাগতম!", tut_prompt_d: "আপনি কি টিউটোরিয়াল দেখতে চান?", tut_yes: "হ্যাঁ", tut_no: "না",
+                tut_skip: "এড়িয়ে যান", tut_next: "পরবর্তী", tut_done: "সম্পন্ন",
+                tut_step1: "+ বোতামে ক্লিক করে কী তৈরি করুন।", tut_step2: "কার্ড থেকে সম্পাদনা বা আনলিঙ্ক করুন।", tut_step3: "এখানে আপনি ডিভাইস ব্লক করতে পারবেন।", tut_step4: "এখানে সিস্টেম সেটিংস আছে।"
+            },
+            ar: {
+                login_title: "لوحة الوصول", lbl_db_url: "رابط Firebase", btn_connect: "اتصال", lbl_rules_hint: "* تأكد من قواعد Firebase.",
+                lbl_saved_conn: "الاتصالات الحديثة",
+                nav_keys: "المفاتيح", nav_bans: "الحظر", nav_sys: "النظام", nav_guide: "دليل",
+                sys_ui: "الواجهة", sys_qr: "رابط الصورة (اللون)", sys_title: "العنوان", sys_sub: "العنوان الفرعي", sys_admin: "رابط المسؤول",
+                sys_maint: "الصيانة", sys_maint_en: "تفعيل الصيانة", sys_upd_en: "فرض التحديث", sys_upd_ver: "الإصدار", sys_upd_msg: "رسالة", sys_upd_url: "رابط التحديث",
+                btn_save: "حفظ", watermark_txt: "بواسطة",
+                filt_all: "الكل", filt_act: "نشط", filt_inact: "غير نشط", filt_near: "قريب الانتهاء", filt_exp: "منتهي", filt_ban: "محظور",
+                mod_key_title: "إنشاء مفتاح", mod_bulk_en: "مفاتيح متعددة", mod_lbl_key: "مفتاح 6 أرقام", mod_lbl_qty: "الكمية", mod_lbl_exp: "الانتهاء", mod_lbl_cname: "اسم العميل", mod_lbl_cpay: "معلومات الدفع",
+                mod_edit_title: "تعديل", mod_lbl_bind: "HWID", mod_ban_title: "حظر", mod_lbl_hwid: "HWID للحظر", btn_block: "حظر", btn_cancel: "إلغاء",
+                err_rules: "قواعد Firebase إلى true true.", err_url: "أدخل الرابط!", msg_success: "نجاح!", msg_copy: "تم النسخ!", empty_keys: "لا توجد مفاتيح", empty_bans: "لا يوجد حظر",
+                gd_status_t: "دليل الألوان", gd_status_d: "افهم حالة المفتاح من خلال النقطة الملونة.",
+                gd_keys_t: "المفاتيح", gd_keys_d: "استخدم أزرار التعديل أو فك الارتباط من البطاقة.", gd_bans_t: "الحظر", gd_bans_d: "حظر HWID.", gd_sys_t: "النظام", gd_sys_d: "يتكيف اللون مع الصورة.", gd_sup_d: "الدعم على تليجرام.",
+                tut_prompt_t: "مرحباً بك!", tut_prompt_d: "هل تريد جولة تعليمية سريعة؟", tut_yes: "نعم", tut_no: "لا",
+                tut_skip: "تخطي", tut_next: "التالي", tut_done: "تم",
+                tut_step1: "انقر على + لإنشاء مفاتيح.", tut_step2: "يمكنك التعديل أو فك الارتباط من هنا.", tut_step3: "إدارة الأجهزة المحظورة.", tut_step4: "إعدادات النظام."
+            }
+        };
+
+        let currentLang = 'en';
+        let savedUrls = JSON.parse(localStorage.getItem('dp_saved_urls')) || [];
+        let isLoggedIn = false;
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('lang-overlay').style.opacity = '0';
+            
+            if(lang === 'ar') document.body.setAttribute('dir', 'rtl');
+            else document.body.setAttribute('dir', 'ltr');
+
+            setTimeout(() => {
+                document.getElementById('lang-overlay').style.display = 'none';
+                document.getElementById('login-screen').style.display = 'flex';
+                applyTranslations();
+                renderSavedUrls();
+            }, 400);
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(i18n[currentLang][key]) {
+                    if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = i18n[currentLang][key];
+                    else el.innerHTML = el.innerHTML.replace(el.innerText, i18n[currentLang][key]);
+                }
+            });
+            const activeNav = document.querySelector('.nav-item.active');
+            if(activeNav) activeNav.click();
+            if(isLoggedIn) { renderKeys(); renderBans(); }
+        }
+
+        function trans(key) { return i18n[currentLang][key] || key; }
+
+        // --- FIREBASE LOGIC (NO TOKEN) ---
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModals(); });
+        });
+
+        let DB_URL = "";
+        let DB = { ban_list: {}, keys: {}, panel_config: {} }; 
+        let currentFilter = 'all';
+
+        window.onload = () => {
+            if(savedUrls.length > 0) {
+                document.getElementById('auth-url').value = savedUrls[0];
+            }
+            document.getElementById('lang-overlay').style.display = 'flex';
+        };
+
+        /* --- URL SAVER LOGIC --- */
+        function renderSavedUrls() {
+            const container = document.getElementById('saved-connections');
+            const list = document.getElementById('saved-url-list');
+            list.innerHTML = "";
+            
+            if(savedUrls.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            savedUrls.forEach((url, index) => {
+                const displayUrl = url.replace('https://', '').split('.')[0]; 
+                
+                list.innerHTML += `
+                    <div class="saved-url-item">
+                        <div class="saved-url-text" onclick="setAndConnect('${url}')" style="flex:1; cursor:pointer;">
+                            <i class="fas fa-database" style="color:var(--ios-primary); margin-right:8px;"></i> ${displayUrl}
+                        </div>
+                        <button class="btn-icon" style="background:rgba(255,69,58,0.1); color:var(--danger); width:30px; height:30px; font-size:0.75rem;" onclick="removeSavedUrl(${index})"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+            });
+        }
+
+        function setAndConnect(url) {
+            document.getElementById('auth-url').value = url;
+            login();
+        }
+
+        function removeSavedUrl(index) {
+            savedUrls.splice(index, 1);
+            localStorage.setItem('dp_saved_urls', JSON.stringify(savedUrls));
+            renderSavedUrls();
+        }
+
+        async function login() {
+            const btn = document.getElementById('login-btn');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+            
+            let url = document.getElementById('auth-url').value.trim();
+
+            if(!url) {
+                showIsland(trans('err_url'), "error");
+                btn.innerHTML = trans('btn_connect'); return;
+            }
+
+            url = url.replace(/\/+$/, '');
+            DB_URL = url;
+
+            try {
+                const res = await fetch(`${DB_URL}/.json`);
+                if(res.status === 401 || res.status === 403 || !res.ok) throw new Error("rules_err");
+                
+                const data = await res.json();
+                if(data && typeof data === 'object') {
+                    DB = data;
+                    if(!DB.ban_list) DB.ban_list = {}; 
+                    if(!DB.keys) DB.keys = {};
+                    if(!DB.panel_config) DB.panel_config = {};
+                }
+
+                if(!savedUrls.includes(DB_URL)) {
+                    savedUrls.unshift(DB_URL);
+                    if(savedUrls.length > 3) savedUrls.pop(); 
+                    localStorage.setItem('dp_saved_urls', JSON.stringify(savedUrls));
+                }
+                
+                isLoggedIn = true;
+
+                document.getElementById('login-screen').style.opacity = '0';
+                document.getElementById('login-screen').style.transform = 'scale(0.95)';
+                
+                setTimeout(() => {
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('main-app').style.display = 'flex'; 
+                    document.getElementById('bottom-nav').style.display = 'flex';
+                    
+                    loadSystem(); renderKeys(); renderBans();
+                    showIsland(trans('msg_success'), "success", "fa-unlock-alt");
+
+                    if(!localStorage.getItem('dp_tutorial_done')) {
+                        setTimeout(() => { document.getElementById('tut-prompt').classList.add('active'); }, 500);
+                    }
+                    
+                    const activeNav = document.querySelector('.nav-item.active');
+                    if(activeNav) activeNav.click(); // Sets FAB state
+                }, 400);
+
+            } catch(e) {
+                if(e.message === "rules_err") showIsland(trans('err_rules'), "error"); 
+                else showIsland("Invalid URL or Error", "error");
+                btn.innerHTML = trans('btn_connect');
+            }
+        }
+
+        async function fetchDatabase() {
+            const icon = document.getElementById('reload-icon');
+            icon.classList.add('spin');
+            try {
+                const res = await fetch(`${DB_URL}/.json`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if(data && typeof data === 'object') {
+                        DB = data;
+                        if(!DB.ban_list) DB.ban_list = {};
+                        if(!DB.keys) DB.keys = {};
+                        if(!DB.panel_config) DB.panel_config = {};
+                    }
+                    loadSystem(); renderKeys(); renderBans();
+                    showIsland(trans('msg_success'), "success", "fa-sync-alt");
+                }
+            } catch(e) {}
+            icon.classList.remove('spin');
+        }
+
+        async function syncNode(nodePath, dataObj) {
+            try {
+                const options = { method: dataObj === null ? 'DELETE' : 'PUT' };
+                if (dataObj !== null) options.body = JSON.stringify(dataObj);
+                await fetch(`${DB_URL}/${nodePath}.json`, options);
+            } catch(e) { showIsland("Sync Error", "error"); }
+        }
+
+        function logout() { localStorage.removeItem('fb_ios_url'); location.reload(); }
+
+        function nav(viewId, el, title) {
+            document.querySelectorAll('.view').forEach(v => {
+                v.style.display = 'none'; v.classList.remove('active');
+            });
+            const nv = document.getElementById('view-' + viewId);
+            nv.style.display = 'block';
+            
+            void nv.offsetWidth; 
+            nv.classList.add('active');
+
+            if (isLoggedIn) {
+                document.getElementById('fab-add-key').style.display = (viewId === 'keys') ? 'flex' : 'none';
+                document.getElementById('fab-add-ban').style.display = (viewId === 'bans') ? 'flex' : 'none';
+            } else {
+                document.getElementById('fab-add-key').style.display = 'none';
+                document.getElementById('fab-add-ban').style.display = 'none';
+            }
+
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if(el) el.classList.add('active');
+            document.getElementById('page-title-text').innerText = title;
+        }
+
+        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
+
+        function copyToClipboard(text, label, event) {
+            if (event) event.stopPropagation(); 
+            const el = document.createElement('textarea'); el.value = text;
+            document.body.appendChild(el); el.select();
+            try { document.execCommand('copy'); showIsland(trans('msg_copy'), "success", "fa-copy"); } catch(e){}
+            document.body.removeChild(el);
+        }
+
+        /* --- DYNAMIC COLOR --- */
+        function updateQRPreview() {
+            const url = document.getElementById('sys-qr-url').value;
+            const img = document.getElementById('preview-qr');
+            const txt = document.getElementById('preview-txt');
+            
+            if(url) {
+                img.src = url; img.style.display = 'block'; txt.style.display = 'none';
+            } else {
+                img.style.display = 'none'; txt.style.display = 'block';
+                document.documentElement.style.setProperty('--ios-primary', '#007AFF');
+                document.documentElement.style.setProperty('--ios-primary-dim', 'rgba(0, 122, 255, 0.15)');
+            }
+        }
+
+        document.getElementById('preview-qr').onload = function() {
+            try {
+                let canvas = document.createElement('canvas');
+                canvas.width = this.width; canvas.height = this.height;
+                let ctx = canvas.getContext('2d');
+                ctx.drawImage(this, 0, 0);
+                let data = ctx.getImageData(0,0, canvas.width, canvas.height).data;
+                let r=0,g=0,b=0, count=0;
+                for(let i=0; i<data.length; i+=40) { r+=data[i]; g+=data[i+1]; b+=data[i+2]; count++; }
+                let avgR = Math.floor(r/count), avgG = Math.floor(g/count), avgB = Math.floor(b/count);
+                document.documentElement.style.setProperty('--ios-primary', `rgb(${avgR+20},${avgG+20},${avgB+50})`);
+                document.documentElement.style.setProperty('--ios-primary-dim', `rgba(${avgR+20},${avgG+20},${avgB+50}, 0.15)`);
+            } catch(e) { 
+                document.documentElement.style.setProperty('--ios-primary', '#a855f7'); 
+                document.documentElement.style.setProperty('--ios-primary-dim', 'rgba(168, 85, 247, 0.15)');
+            }
+        }
+
+        /* --- SYSTEM CONFIGURATION --- */
+        function loadSystem() {
+            const cfg = DB.panel_config || {};
+            document.getElementById('sys-admin-url').value = cfg.admin_url || "";
+            document.getElementById('sys-qr-url').value = cfg.qr_image_url || "";
+            updateQRPreview();
+            
+            const maint = cfg.maintenance || {};
+            document.getElementById('chk-maint').checked = maint.enabled === true;
+            document.getElementById('sys-maint-msg').value = maint.message || "";
+
+            const upd = cfg.update || {};
+            document.getElementById('chk-update').checked = upd.enabled === true;
+            document.getElementById('sys-upd-ver').value = upd.version_code || 1;
+            document.getElementById('sys-upd-msg').value = upd.message || "";
+            document.getElementById('sys-upd-url').value = upd.url || "";
+        }
+
+        async function saveSystem() {
+            const newConfig = {
+                admin_url: document.getElementById('sys-admin-url').value.trim(),
+                qr_image_url: document.getElementById('sys-qr-url').value.trim(),
+                maintenance: {
+                    enabled: document.getElementById('chk-maint').checked,
+                    message: document.getElementById('sys-maint-msg').value
+                },
+                update: {
+                    enabled: document.getElementById('chk-update').checked,
+                    version_code: parseInt(document.getElementById('sys-upd-ver').value) || 1,
+                    message: document.getElementById('sys-upd-msg').value,
+                    url: document.getElementById('sys-upd-url').value.trim()
+                }
+            };
+            DB.panel_config = newConfig;
+            await syncNode('panel_config', newConfig);
+            showIsland(trans('msg_success'), "success", "fa-cogs");
+        }
+
+        /* --- KEYS LOGIC --- */
+        function setFilter(filterType, el) {
+            currentFilter = filterType;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderKeys();
+        }
+
+        function openKeyModal() {
+            document.getElementById('mod-key-id').value = "";
+            const now = new Date(); now.setMonth(now.getMonth() + 1);
+            document.getElementById('mod-key-date').valueAsDate = now;
+            document.getElementById('chk-bulk').checked = false;
+            document.getElementById('bulk-qty-row').style.display = 'none';
+            document.getElementById('single-key-row').style.display = 'block';
+            document.getElementById('key-modal').classList.add('active');
+        }
+
+        function enforceNumeric(el) { el.value = el.value.replace(/[^0-9]/g, '').slice(0,6); }
+        function randomKey() { document.getElementById('mod-key-id').value = Math.floor(100000 + Math.random() * 900000).toString(); }
+
+        async function saveKey() {
+            const isBulk = document.getElementById('chk-bulk').checked;
+            const expDate = document.getElementById('mod-key-date').value;
+            const cName = document.getElementById('mod-key-cname').value.trim();
+            const cPay = document.getElementById('mod-key-cpay').value.trim();
+            if(!expDate) return;
+
+            let newKeysObj = {};
+            if(isBulk) {
+                const qty = parseInt(document.getElementById('mod-bulk-qty').value) || 1;
+                for(let i=0; i<qty; i++) {
+                    let newId;
+                    do { newId = Math.floor(100000 + Math.random() * 900000).toString(); } while(DB.keys[newId] || newKeysObj[newId]); 
+                    
+                    let keyObj = { bind_id: "", expire_date: expDate };
+                    if(cName) keyObj.client_name = cName;
+                    if(cPay) keyObj.payment = cPay;
+                    
+                    newKeysObj[newId] = keyObj;
+                    DB.keys[newId] = newKeysObj[newId];
+                }
+            } else {
+                const keyId = document.getElementById('mod-key-id').value.trim();
+                if(keyId.length !== 6) return showIsland("Must be 6 digits!", "error");
+                if(DB.keys[keyId]) return showIsland("Exists!", "error");
+                
+                let keyObj = { bind_id: "", expire_date: expDate };
+                if(cName) keyObj.client_name = cName;
+                if(cPay) keyObj.payment = cPay;
+
+                newKeysObj[keyId] = keyObj;
+                DB.keys[keyId] = newKeysObj[keyId];
+            }
+
+            try {
+                await fetch(`${DB_URL}/keys.json`, { method: 'PATCH', body: JSON.stringify(newKeysObj) });
+                showIsland(trans('msg_success'), "success", "fa-key");
+            } catch(e) {}
+            closeModals(); renderKeys();
+        }
+
+        function openEditKeyModal(keyId) {
+            const data = DB.keys[keyId] || {};
+            document.getElementById('edit-key-id').value = keyId;
+            document.getElementById('edit-key-hwid').value = data.bind_id || "";
+            document.getElementById('edit-key-cname').value = data.client_name || "";
+            document.getElementById('edit-key-cpay').value = data.payment || "";
+            if(data.expire_date) document.getElementById('edit-key-date').value = data.expire_date;
+            document.getElementById('edit-key-modal').classList.add('active');
+        }
+
+        async function saveEditedKey() {
+            const keyId = document.getElementById('edit-key-id').value;
+            const newHwid = document.getElementById('edit-key-hwid').value.trim();
+            const newDate = document.getElementById('edit-key-date').value;
+            const newName = document.getElementById('edit-key-cname').value.trim();
+            const newPay = document.getElementById('edit-key-cpay').value.trim();
+
+            DB.keys[keyId].bind_id = newHwid;
+            DB.keys[keyId].expire_date = newDate;
+            if(newName) DB.keys[keyId].client_name = newName; else delete DB.keys[keyId].client_name;
+            if(newPay) DB.keys[keyId].payment = newPay; else delete DB.keys[keyId].payment;
+            
+            await syncNode(`keys/${keyId}`, DB.keys[keyId]);
+            closeModals(); renderKeys();
+            showIsland(trans('msg_success'), "success", "fa-pen");
+        }
+
+        async function deleteKey(keyId) {
+            if(confirm(`Delete Key ${keyId}?`)) {
+                delete DB.keys[keyId]; 
+                await syncNode(`keys/${keyId}`, null);
+                renderKeys(); showIsland(trans('msg_success'), "success", "fa-trash");
+            }
+        }
+
+        async function unlinkShortcut(keyId) {
+            if(confirm(`Unlink Device from ${keyId}?`)) {
+                DB.keys[keyId].bind_id = "";
+                await syncNode(`keys/${keyId}/bind_id`, "");
+                renderKeys(); showIsland(trans('msg_success'), "success");
+            }
+        }
+
+        function getKeyStatus(data) {
+            const today = new Date();
+            const exp = new Date(data.expire_date);
+            const diffTime = exp - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            const isBound = data.bind_id && data.bind_id !== "";
+            const isBanned = isBound && DB.ban_list && DB.ban_list[data.bind_id];
+
+            if (isBanned) return { id: 'banned', color: 'var(--danger-dark)' };
+            if (diffDays < 0) return { id: 'expired', color: 'var(--danger)' };
+            if (diffDays <= 3 && isBound) return { id: 'nearby', color: 'var(--warning)' };
+            if (!isBound) return { id: 'inactive', color: 'var(--inactive)' };
+            return { id: 'active', color: 'var(--success)' };
+        }
+
+        function renderKeys() {
+            const list = document.getElementById('keys-list');
+            const search = document.getElementById('search-keys').value.toLowerCase();
+            list.innerHTML = ""; let count = 0;
+            
+            const keyArray = Object.entries(DB.keys || {}).reverse();
+
+            keyArray.forEach(([keyId, data]) => {
+                const hwid = data.bind_id || ""; 
+                const cName = data.client_name || "";
+                const cPay = data.payment || "";
+                const statusObj = getKeyStatus(data);
+                
+                let matchSearch = search === "" || 
+                    keyId.toLowerCase().includes(search) || 
+                    hwid.toLowerCase().includes(search) || 
+                    cName.toLowerCase().includes(search) || 
+                    cPay.toLowerCase().includes(search);
+                if(!matchSearch) return;
+
+                if (currentFilter !== 'all' && currentFilter !== statusObj.id) return;
+                
+                count++;
+                
+                let devicesHtml = hwid !== "" ? 
+                    `<div class="device-row">
+                        <span style="color:var(--success); font-weight:700;"><i class="fas fa-link"></i></span>
+                        <span class="interactive-text" style="font-family:var(--font-code); color:#fff;" onclick="copyToClipboard('${hwid}', 'HWID', event)">
+                        ${hwid} <i class="fas fa-copy" style="color:var(--text-dim);"></i></span>
+                    </div>` : 
+                    `<div style="font-size:0.7rem; color:var(--text-dim); text-align:center; padding:6px; margin-top:4px; border:1px dashed rgba(255,255,255,0.05); border-radius:10px;">Unused Key</div>`;
+
+                let clientHtml = "";
+                if(cName || cPay) {
+                    clientHtml = `<div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-dim); background:rgba(255,255,255,0.05); padding:6px 10px; border-radius:10px; margin-top:8px;">`;
+                    if(cName) clientHtml += `<span><i class="fas fa-user"></i> ${cName}</span>`;
+                    if(cPay) clientHtml += `<span><i class="fas fa-credit-card"></i> ${cPay}</span>`;
+                    clientHtml += `</div>`;
+                }
+
+                const unlinkBtnHtml = hwid !== "" ? `<button class="btn-xs unlink" onclick="unlinkShortcut('${keyId}')" title="Unlink Device"><i class="fas fa-unlink"></i></button>` : '';
+
+                list.innerHTML += `
+                    <div class="list-card">
+                        <div class="card-header">
+                            <div class="card-title interactive-text" onclick="copyToClipboard('${keyId}', 'Key', event)">
+                                <span class="status-dot" style="background:${statusObj.color};"></span>
+                                ${keyId}
+                            </div>
+                            <div style="font-size:0.7rem; color:var(--text-dim);"><i class="far fa-clock"></i> ${data.expire_date}</div>
+                        </div>
+                        ${clientHtml}
+                        ${devicesHtml}
+                        <div class="card-actions">
+                            ${unlinkBtnHtml}
+                            <button class="btn-xs edit" onclick="openEditKeyModal('${keyId}')"><i class="fas fa-pen"></i></button>
+                            <button class="btn-xs del" style="background:rgba(255, 69, 58, 0.1);" onclick="deleteKey('${keyId}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            if(count === 0) list.innerHTML = `<div class="empty-state">${trans('empty_keys')}</div>`;
+        }
+
+        /* --- BANS LOGIC --- */
+        function openBanModal() { document.getElementById('mod-ban-id').value = ''; document.getElementById('ban-modal').classList.add('active'); }
+        async function saveBan() {
+            const hwid = document.getElementById('mod-ban-id').value.trim();
+            if(!hwid) return;
+            if(!DB.ban_list) DB.ban_list = {};
+            DB.ban_list[hwid] = true; 
+            await syncNode(`ban_list/${hwid}`, true);
+            closeModals(); renderBans(); showIsland(trans('msg_success'), "success", "fa-user-slash");
+        }
+        async function unbanHWID(hwid) {
+            if(confirm(`Remove ${hwid}?`)) {
+                delete DB.ban_list[hwid]; await syncNode(`ban_list/${hwid}`, null);
+                renderBans(); showIsland(trans('msg_success'), "success");
+            }
+        }
+        function renderBans() {
+            const list = document.getElementById('bans-list'); list.innerHTML = ""; let count = 0;
+            Object.keys(DB.ban_list || {}).forEach((hwid) => { count++;
+                list.innerHTML += `
+                    <div class="list-card banned" style="padding:14px; display:flex; justify-content:space-between; align-items:center;">
+                        <div class="interactive-text" style="color:var(--danger); font-family:var(--font-code); font-weight:700;" onclick="copyToClipboard('${hwid}', 'Banned ID', event)">
+                            ${hwid} <i class="fas fa-copy" style="font-size:0.7rem; opacity:0.8;"></i>
+                        </div>
+                        <button class="btn-icon" style="background:rgba(255,69,58,0.1); color:var(--danger); width:32px; height:32px;" onclick="unbanHWID('${hwid}')"><i class="fas fa-trash" style="font-size:0.8rem;"></i></button>
+                    </div>`;
+            });
+            if(count === 0) list.innerHTML = `<div class="empty-state">${trans('empty_bans')}</div>`;
+        }
+
+        /* --- TUTORIAL LOGIC --- */
+        let tutStep = 0;
+        function closeTutPrompt() {
+            localStorage.setItem('dp_tutorial_done', 'true');
+            document.getElementById('tut-prompt').classList.remove('active');
+        }
+        function startTutorial() {
+            closeTutPrompt();
+            document.getElementById('tutorial-overlay').style.display = 'flex';
+            showTutStep(1);
+        }
+        function nextTutorialStep() { showTutStep(tutStep + 1); }
+        function endTutorial() { document.getElementById('tutorial-overlay').style.display = 'none'; }
+        
+        function showTutStep(step) {
+            tutStep = step;
+            const tt = document.getElementById('tut-tooltip');
+            const txt = document.getElementById('tut-text');
+            const btn = document.getElementById('tut-next-btn');
+            
+            tt.classList.remove('top-arrow', 'bottom-arrow');
+            
+            if(step === 1) {
+                txt.innerText = trans('tut_step1');
+                nav('keys', document.getElementById('nav-tab-keys'), trans('nav_keys'));
+                tt.style.bottom = '110px'; tt.style.top = 'auto'; tt.classList.add('bottom-arrow');
+                btn.innerText = trans('tut_next');
+            } else if(step === 2) {
+                txt.innerText = trans('tut_step2');
+                tt.style.top = '150px'; tt.style.bottom = 'auto'; tt.classList.add('top-arrow');
+            } else if(step === 3) {
+                txt.innerText = trans('tut_step3');
+                nav('bans', document.getElementById('nav-tab-bans'), trans('nav_bans'));
+                tt.style.bottom = '100px'; tt.style.top = 'auto'; tt.classList.add('bottom-arrow');
+            } else if(step === 4) {
+                txt.innerText = trans('tut_step4');
+                nav('system', document.getElementById('nav-tab-sys'), trans('nav_sys'));
+                tt.style.bottom = '100px'; tt.style.top = 'auto'; tt.classList.add('bottom-arrow');
+                btn.innerText = trans('tut_done');
+            } else {
+                endTutorial();
+            }
+        }
+    </script>
+</body>
+</html>
