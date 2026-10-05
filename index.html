@@ -882,6 +882,20 @@
         </div>
     </div>
 
+    <!-- Confirm Modal (replaces native confirm() which never shows inside Android WebView) -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-card" style="text-align:center;">
+            <div class="modal-handle"></div>
+            <i class="fas fa-exclamation-triangle" style="font-size:3rem; color:var(--danger); margin-bottom:15px;"></i>
+            <h2 style="color:#fff; margin-bottom:10px;">Are you sure?</h2>
+            <p style="color:var(--text-dim); font-size:0.95rem; margin-bottom:25px; word-break:break-word;" id="confirm-msg"></p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" style="background: rgba(255,255,255,0.1);" onclick="settleConfirm(false)" data-i18n="btn_cancel">Cancel</button>
+                <button class="btn" style="background: var(--danger);" onclick="settleConfirm(true)" id="confirm-ok-btn">Delete</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Interactive Tutorial Overlay -->
     <div id="tutorial-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 30000; display: none; flex-direction: column; align-items: center;">
         <div class="tut-tooltip top-arrow" id="tut-tooltip" style="position: absolute; background: var(--ios-primary); color: #fff; padding: 16px; border-radius: 16px; width: 80%; max-width: 300px; text-align: center; font-weight: 600; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.8); transition: 0.4s ease;">
@@ -1231,7 +1245,27 @@
             document.getElementById('page-title-text').innerText = title;
         }
 
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
+        function closeModals() { 
+            settleConfirm(false); // any backdrop tap / close also cancels a pending confirm
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); 
+        }
+
+        // --- IN-PANEL CONFIRM (native confirm() is silently dropped by Android WebView) ---
+        let _confirmCb = null;
+        function askConfirm(msg, okLabel) {
+            return new Promise(resolve => {
+                _confirmCb = resolve;
+                document.getElementById('confirm-msg').textContent = msg;
+                document.getElementById('confirm-ok-btn').textContent = okLabel || 'Delete';
+                document.getElementById('confirm-modal').classList.add('active');
+            });
+        }
+        function settleConfirm(result) {
+            if(!_confirmCb) return;
+            document.getElementById('confirm-modal').classList.remove('active');
+            const cb = _confirmCb; _confirmCb = null;
+            cb(result);
+        }
 
         /* Snackbar / dynamic island toast — was referenced 16x but never defined,
            which silently killed validation, error and success feedback. */
@@ -1417,7 +1451,7 @@
         }
 
         async function deleteKey(keyId) {
-            if(confirm(`Delete Key ${keyId}?`)) {
+            if(await askConfirm(`Delete Key ${keyId}?`, 'Delete')) {
                 delete DB.keys[keyId]; 
                 await syncNode(`keys/${keyId}`, null);
                 renderKeys(); showIsland(trans('msg_success'), "success", "fa-trash");
@@ -1425,7 +1459,7 @@
         }
 
         async function unlinkShortcut(keyId) {
-            if(confirm(`Unlink Device from ${keyId}?`)) {
+            if(await askConfirm(`Unlink Device from ${keyId}?`, 'Unlink')) {
                 DB.keys[keyId].bind_id = "";
                 await syncNode(`keys/${keyId}/bind_id`, "");
                 renderKeys(); showIsland(trans('msg_success'), "success");
@@ -1523,7 +1557,7 @@
             closeModals(); renderBans(); showIsland(trans('msg_success'), "success", "fa-user-slash");
         }
         async function unbanHWID(hwid) {
-            if(confirm(`Remove ${hwid}?`)) {
+            if(await askConfirm(`Remove ${hwid}?`, 'Remove')) {
                 delete DB.ban_list[hwid]; await syncNode(`ban_list/${hwid}`, null);
                 renderBans(); showIsland(trans('msg_success'), "success");
             }
