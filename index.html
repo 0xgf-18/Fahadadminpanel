@@ -112,11 +112,13 @@
         /* --- HEADER --- */
         .page-header { padding: 40px 20px 15px; display: flex; justify-content: space-between; align-items: flex-end; position: sticky; top: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 50; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .app-main-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; color: #fff;}
-        .db-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.03em; color: #32D74B; background: rgba(50,215,75,0.10); border: 1px solid rgba(50,215,75,0.28); padding: 3px 8px; border-radius: 999px; margin-top: 6px; width: max-content; cursor: pointer; }
+        .db-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.03em; color: #32D74B; background: rgba(50,215,75,0.10); border: 1px solid rgba(50,215,75,0.28); padding: 3px 8px; border-radius: 999px; margin-top: 6px; width: max-content; max-width: 100%; cursor: pointer; }
+        .db-badge #db-badge-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .db-badge.wrong { color: #FF9F0A; background: rgba(255,159,10,0.12); border-color: rgba(255,159,10,0.45); }
         .db-warn { display: flex; align-items: flex-start; gap: 10px; margin: 12px 16px 0; padding: 11px 13px; border-radius: 14px; background: rgba(255,159,10,0.12); border: 1px solid rgba(255,159,10,0.45); color: #FFD60A; font-size: 0.72rem; line-height: 1.5; }
         .db-warn i { color: #FF9F0A; margin-top: 3px; }
-        .header-actions { display: flex; gap: 10px; align-items: center;}
+        .header-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0;}
+        .header-title-box { flex: 1; min-width: 0; }
         .btn-icon { background: rgba(255,255,255,0.1); color: #fff; width: 40px; height: 40px; border-radius: 20px; font-size: 1rem; border: none; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s;}
         .btn-icon:active { transform: scale(0.9); opacity: 0.7; }
 
@@ -656,7 +658,7 @@
 
         <div class="db-warn" id="db-warn" style="display:none;">
             <i class="fas fa-exclamation-triangle"></i>
-            <div>Connected database: <b id="db-warn-host"></b><br>Your Fahad Login app reads <b>fahad-auth-default-rtdb.firebaseio.com</b> &mdash; edits saved here will NEVER reach the app.</div>
+            <div>Connected database: <b id="db-warn-host"></b><br>Your Fahad Login app reads <b>fahad-auth-default-rtdb.firebaseio.com</b> &mdash; edits saved here will NEVER reach the app.<br><button class="btn btn-primary" onclick="switchDatabase()" style="width:auto; margin-top:10px; padding:9px 15px; font-size:0.72rem; font-weight:700; border-radius:11px;"><i class="fas fa-power-off"></i> Change database</button></div>
         </div>
 
         <div class="page-header">
@@ -1069,7 +1071,9 @@
                     renderSavedUrls();
                     /* Reconnect to the last used database automatically, so closing and
                        reopening the app never leaves you editing a disconnected panel. */
-                    if(savedUrls.length > 0 && !window.__autoConnectTried) {
+                    let skipAuto = false;
+                    try { skipAuto = sessionStorage.getItem('dp_skip_auto') === '1'; sessionStorage.removeItem('dp_skip_auto'); } catch(e) {}
+                    if(!skipAuto && savedUrls.length > 0 && !window.__autoConnectTried) {
                         window.__autoConnectTried = true;
                         setTimeout(() => { if(!isLoggedIn) setAndConnect(savedUrls[0]); }, 350);
                     }
@@ -1246,7 +1250,7 @@
         /* The database the Fahad Login app itself reads. If the panel is connected
            to any other URL, edits never reach the app - so say it out loud. */
         const CANONICAL_DB = 'https://fahad-auth-default-rtdb.firebaseio.com';
-        function dbHostLabel(url) { return (url || '').replace('https:\/\/','').replace('http:\/\/','').split('/')[0]; }
+        function dbHostLabel(url) { return (url || '').replace('https:\/\/','').replace('http:\/\/','').split('/')[0].replace('.firebaseio.com','').replace('.firebasedatabase.app',''); }
         function updateDbBadge() {
             const badge = document.getElementById('db-badge');
             const label = document.getElementById('db-badge-label');
@@ -1263,7 +1267,17 @@
             }
         }
 
-        function logout() { localStorage.removeItem('fb_ios_url'); location.reload(); }
+        function logout() { try { sessionStorage.setItem('dp_skip_auto', '1'); } catch(e) {} localStorage.removeItem('fb_ios_url'); location.reload(); }
+
+        /* Drop the currently connected URL and land on a clean connect screen. */
+        function switchDatabase() {
+            try {
+                savedUrls = savedUrls.filter(u => u !== DB_URL);
+                localStorage.setItem('dp_saved_urls', JSON.stringify(savedUrls));
+                sessionStorage.setItem('dp_skip_auto', '1');
+            } catch(e) {}
+            location.reload();
+        }
 
         function nav(viewId, el, title) {
             document.querySelectorAll('.view').forEach(v => {
