@@ -112,6 +112,10 @@
         /* --- HEADER --- */
         .page-header { padding: 40px 20px 15px; display: flex; justify-content: space-between; align-items: flex-end; position: sticky; top: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 50; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .app-main-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; color: #fff;}
+        .db-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.03em; color: #32D74B; background: rgba(50,215,75,0.10); border: 1px solid rgba(50,215,75,0.28); padding: 3px 8px; border-radius: 999px; margin-top: 6px; width: max-content; cursor: pointer; }
+        .db-badge.wrong { color: #FF9F0A; background: rgba(255,159,10,0.12); border-color: rgba(255,159,10,0.45); }
+        .db-warn { display: flex; align-items: flex-start; gap: 10px; margin: 12px 16px 0; padding: 11px 13px; border-radius: 14px; background: rgba(255,159,10,0.12); border: 1px solid rgba(255,159,10,0.45); color: #FFD60A; font-size: 0.72rem; line-height: 1.5; }
+        .db-warn i { color: #FF9F0A; margin-top: 3px; }
         .header-actions { display: flex; gap: 10px; align-items: center;}
         .btn-icon { background: rgba(255,255,255,0.1); color: #fff; width: 40px; height: 40px; border-radius: 20px; font-size: 1rem; border: none; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s;}
         .btn-icon:active { transform: scale(0.9); opacity: 0.7; }
@@ -649,10 +653,16 @@
 
     <!-- MAIN APP -->
     <div class="app-container" id="main-app" style="display: none;">
-        
+
+        <div class="db-warn" id="db-warn" style="display:none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>Connected database: <b id="db-warn-host"></b><br>Your Fahad Login app reads <b>fahad-auth-default-rtdb.firebaseio.com</b> &mdash; edits saved here will NEVER reach the app.</div>
+        </div>
+
         <div class="page-header">
             <div class="header-title-box">
                 <span class="app-main-title" id="page-title-text" data-i18n="nav_keys">Keys</span>
+                <span class="db-badge" id="db-badge" style="display:none;" onclick="showIsland(DB_URL ? ('Connected to: ' + DB_URL) : 'Not connected', 'info', 'fa-database')"><i class="fas fa-database"></i><span id="db-badge-label"></span></span>
             </div>
             <div class="header-actions">
                 <button class="btn-icon" onclick="openLangOverlay()"><i class="fas fa-globe"></i></button>
@@ -1057,6 +1067,12 @@
                 if (typeof isLoggedIn === 'undefined' || !isLoggedIn) {
                     document.getElementById('login-screen').style.display = 'flex';
                     renderSavedUrls();
+                    /* Reconnect to the last used database automatically, so closing and
+                       reopening the app never leaves you editing a disconnected panel. */
+                    if(savedUrls.length > 0 && !window.__autoConnectTried) {
+                        window.__autoConnectTried = true;
+                        setTimeout(() => { if(!isLoggedIn) setAndConnect(savedUrls[0]); }, 350);
+                    }
                 }
                 applyTranslations();
             }, 400);
@@ -1163,6 +1179,7 @@
                 }
                 
                 isLoggedIn = true;
+                updateDbBadge();
 
                 document.getElementById('login-screen').style.opacity = '0';
                 document.getElementById('login-screen').style.transform = 'scale(0.95)';
@@ -1213,11 +1230,37 @@
         }
 
         async function syncNode(nodePath, dataObj) {
+            if(!DB_URL) { showIsland("Not connected \u2014 nothing was saved!", "error"); return false; }
             try {
                 const options = { method: dataObj === null ? 'DELETE' : 'PUT' };
                 if (dataObj !== null) options.body = JSON.stringify(dataObj);
-                await fetch(`${DB_URL}/${nodePath}.json`, options);
-            } catch(e) { showIsland("Sync Error", "error"); }
+                const res = await fetch(`${DB_URL}/${nodePath}.json`, options);
+                if(!res.ok) throw new Error('HTTP ' + res.status);
+                return true;
+            } catch(e) {
+                showIsland('Write failed \u2014 NOT saved! (' + (e.message || 'no network') + ')', 'error');
+                return false;
+            }
+        }
+
+        /* The database the Fahad Login app itself reads. If the panel is connected
+           to any other URL, edits never reach the app - so say it out loud. */
+        const CANONICAL_DB = 'https://fahad-auth-default-rtdb.firebaseio.com';
+        function dbHostLabel(url) { return (url || '').replace('https:\/\/','').replace('http:\/\/','').split('/')[0]; }
+        function updateDbBadge() {
+            const badge = document.getElementById('db-badge');
+            const label = document.getElementById('db-badge-label');
+            const warn = document.getElementById('db-warn');
+            if(!badge || !label) return;
+            if(!DB_URL) { badge.style.display = 'none'; if(warn) warn.style.display = 'none'; return; }
+            badge.style.display = 'inline-flex';
+            label.textContent = dbHostLabel(DB_URL);
+            const wrong = DB_URL.replace(/\/+$/,'') !== CANONICAL_DB;
+            badge.classList.toggle('wrong', wrong);
+            if(warn) {
+                if(wrong) { document.getElementById('db-warn-host').textContent = DB_URL; warn.style.display = 'flex'; }
+                else warn.style.display = 'none';
+            }
         }
 
         function logout() { localStorage.removeItem('fb_ios_url'); location.reload(); }
@@ -1356,9 +1399,10 @@
                     url: document.getElementById('sys-upd-url').value.trim()
                 }
             };
-            DB.panel_config = newConfig;
-            await syncNode('panel_config', newConfig);
-            showIsland(trans('msg_success'), "success", "fa-cogs");
+            if(await syncNode('panel_config', newConfig)) {
+                DB.panel_config = newConfig;
+                showIsland(trans('msg_success'), "success", "fa-cogs");
+            }
         }
 
         /* --- KEYS LOGIC --- */
@@ -1401,7 +1445,6 @@
                     if(cPay) keyObj.payment = cPay;
                     
                     newKeysObj[newId] = keyObj;
-                    DB.keys[newId] = newKeysObj[newId];
                 }
             } else {
                 const keyId = document.getElementById('mod-key-id').value.trim();
@@ -1413,14 +1456,19 @@
                 if(cPay) keyObj.payment = cPay;
 
                 newKeysObj[keyId] = keyObj;
-                DB.keys[keyId] = newKeysObj[keyId];
             }
 
+            if(!DB_URL) { showIsland("Not connected \u2014 key NOT saved!", "error"); return; }
             try {
-                await fetch(`${DB_URL}/keys.json`, { method: 'PATCH', body: JSON.stringify(newKeysObj) });
+                const res = await fetch(`${DB_URL}/keys.json`, { method: 'PATCH', body: JSON.stringify(newKeysObj) });
+                if(!res.ok) throw new Error('HTTP ' + res.status);
+                Object.assign(DB.keys, newKeysObj);
+                closeModals();
                 showIsland(trans('msg_success'), "success", "fa-key");
-            } catch(e) {}
-            closeModals(); renderKeys();
+            } catch(e) {
+                showIsland('Write failed \u2014 key NOT saved! (' + e.message + ')', 'error');
+            }
+            renderKeys();
         }
 
         function openEditKeyModal(keyId) {
@@ -1440,29 +1488,34 @@
             const newName = document.getElementById('edit-key-cname').value.trim();
             const newPay = document.getElementById('edit-key-cpay').value.trim();
 
-            DB.keys[keyId].bind_id = newHwid;
-            DB.keys[keyId].expire_date = newDate;
-            if(newName) DB.keys[keyId].client_name = newName; else delete DB.keys[keyId].client_name;
-            if(newPay) DB.keys[keyId].payment = newPay; else delete DB.keys[keyId].payment;
-            
-            await syncNode(`keys/${keyId}`, DB.keys[keyId]);
-            closeModals(); renderKeys();
-            showIsland(trans('msg_success'), "success", "fa-pen");
+            const keyObj = Object.assign({}, DB.keys[keyId] || {});
+            keyObj.bind_id = newHwid;
+            keyObj.expire_date = newDate;
+            if(newName) keyObj.client_name = newName; else delete keyObj.client_name;
+            if(newPay) keyObj.payment = newPay; else delete keyObj.payment;
+
+            if(await syncNode(`keys/${keyId}`, keyObj)) {
+                DB.keys[keyId] = keyObj;
+                closeModals(); renderKeys();
+                showIsland(trans('msg_success'), "success", "fa-pen");
+            }
         }
 
         async function deleteKey(keyId) {
             if(await askConfirm(`Delete Key ${keyId}?`, 'Delete')) {
-                delete DB.keys[keyId]; 
-                await syncNode(`keys/${keyId}`, null);
-                renderKeys(); showIsland(trans('msg_success'), "success", "fa-trash");
+                if(await syncNode(`keys/${keyId}`, null)) {
+                    delete DB.keys[keyId];
+                    renderKeys(); showIsland(trans('msg_success'), "success", "fa-trash");
+                }
             }
         }
 
         async function unlinkShortcut(keyId) {
             if(await askConfirm(`Unlink Device from ${keyId}?`, 'Unlink')) {
-                DB.keys[keyId].bind_id = "";
-                await syncNode(`keys/${keyId}/bind_id`, "");
-                renderKeys(); showIsland(trans('msg_success'), "success");
+                if(await syncNode(`keys/${keyId}/bind_id`, "")) {
+                    DB.keys[keyId].bind_id = "";
+                    renderKeys(); showIsland(trans('msg_success'), "success");
+                }
             }
         }
 
@@ -1552,14 +1605,17 @@
             const hwid = document.getElementById('mod-ban-id').value.trim();
             if(!hwid) return;
             if(!DB.ban_list) DB.ban_list = {};
-            DB.ban_list[hwid] = true; 
-            await syncNode(`ban_list/${hwid}`, true);
-            closeModals(); renderBans(); showIsland(trans('msg_success'), "success", "fa-user-slash");
+            if(await syncNode(`ban_list/${hwid}`, true)) {
+                DB.ban_list[hwid] = true;
+                closeModals(); renderBans(); showIsland(trans('msg_success'), "success", "fa-user-slash");
+            }
         }
         async function unbanHWID(hwid) {
             if(await askConfirm(`Remove ${hwid}?`, 'Remove')) {
-                delete DB.ban_list[hwid]; await syncNode(`ban_list/${hwid}`, null);
-                renderBans(); showIsland(trans('msg_success'), "success");
+                if(await syncNode(`ban_list/${hwid}`, null)) {
+                    delete DB.ban_list[hwid];
+                    renderBans(); showIsland(trans('msg_success'), "success");
+                }
             }
         }
         function renderBans() {
